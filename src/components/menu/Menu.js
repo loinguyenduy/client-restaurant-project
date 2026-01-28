@@ -1,54 +1,31 @@
-import React, { useEffect, useState } from 'react';
-import { Search, Filter, ShoppingCart } from 'lucide-react';
-import './Menu.scss';
-import { getAllCategories } from '../../services/categoryService';
+import React, { useEffect, useState } from "react";
+import { Search, Filter, ShoppingCart } from "lucide-react";
+import "./Menu.scss";
+import { getAllCategories } from "../../services/categoryService";
+import { getAllProducts } from "../../services/productService";
 
 const Menu = () => {
-  // // Mock Data for Categories
-  // const categories = [
-  //   { id: '1', name: 'All' },
-  //   { id: '2', name: 'Main Courses' },
-  //   { id: '3', name: 'Appetizers' },
-  //   { id: '4', name: 'Desserts' },
-  //   { id: '5', name: 'Drinks' },
-  // ];
-
-  const [categories, setCategories] = useState([])
-  // Mock Data for Products
-  const products = [
-    {
-      id: 'p1',
-      name: 'Grilled Ribeye Steak',
-      description: 'Premium beef served with asparagus and red wine sauce.',
-      price: '45.00',
-      image_url: 'https://images.unsplash.com/photo-1546248136-3d215ec9f54e?auto=format&fit=crop&w=800'
-    },
-    {
-      id: 'p2',
-      name: 'Atlantic Salmon',
-      description: 'Fresh salmon fillet with lemon butter sauce and herbs.',
-      price: '38.50',
-      image_url: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=800'
-    },
-    {
-      id: 'p3',
-      name: 'Classic Caesar Salad',
-      description: 'Crispy romaine lettuce, parmesan cheese, and croutons.',
-      price: '18.00',
-      image_url: 'https://images.unsplash.com/photo-1550304943-4f24f54ddde9?auto=format&fit=crop&w=800'
-    }
-  ];
+  const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    fetchCategories()
-  }, [])
+    fetchCategories();
+    fetchProducts();
+  }, []);
 
   const fetchCategories = async () => {
     let res = await getAllCategories();
-    if (res && res.EC === 0){
-      setCategories(res.DT)
+    if (res && res.EC === 0) {
+      setCategories(res.DT);
     }
-  }
+  };
+
+  const fetchProducts = async () => {
+    let res = await getAllProducts();
+    if (res && res.EC === 0) {
+      setProducts(res.DT);
+    }
+  };
   return (
     <div className="menu-page">
       {/* Menu Banner */}
@@ -65,7 +42,7 @@ const Menu = () => {
           <h3 className="sidebar-title">Categories</h3>
           <ul className="category-list">
             {categories.map((item) => (
-              <li key={item.id} className={item.name === 'All' ? 'active' : ''}>
+              <li key={item.id} className={item.name === "All" ? "active" : ""}>
                 {item.name}
               </li>
             ))}
