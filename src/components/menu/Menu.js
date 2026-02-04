@@ -3,15 +3,23 @@ import { Search, Filter, ShoppingCart } from "lucide-react";
 import "./Menu.scss";
 import { getAllCategories } from "../../services/categoryService";
 import { getAllProducts } from "../../services/productService";
+import { useSearchParams } from "react-router-dom";
+
 
 const Menu = () => {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const currentCategory = searchParams.get('category') || 'all';
 
   useEffect(() => {
     fetchCategories();
-    fetchProducts();
   }, []);
+
+    useEffect(() => {
+    fetchProducts();
+  }, [currentCategory]);
 
   const fetchCategories = async () => {
     let res = await getAllCategories();
@@ -21,11 +29,16 @@ const Menu = () => {
   };
 
   const fetchProducts = async () => {
-    let res = await getAllProducts();
+    let res = await getAllProducts(currentCategory);
     if (res && res.EC === 0) {
       setProducts(res.DT);
     }
   };
+
+  const handleFilterClick = (id) => {
+    setSearchParams({ category: id });
+  };
+
   return (
     <div className="menu-page">
       {/* Menu Banner */}
@@ -41,8 +54,17 @@ const Menu = () => {
         <aside className="category-sidebar">
           <h3 className="sidebar-title">Categories</h3>
           <ul className="category-list">
+            <li
+              className={currentCategory === "all" ? "active" : ""}
+              onClick={() => handleFilterClick("all")}
+            >
+              All
+            </li>
+
             {categories.map((item) => (
-              <li key={item.id} className={item.name === "All" ? "active" : ""}>
+              <li key={item.id} className={item.id === currentCategory ? "active" : ""}
+              onClick={() => handleFilterClick(item.id)}
+              >
                 {item.name}
               </li>
             ))}
@@ -52,7 +74,7 @@ const Menu = () => {
         {/* Main Menu Content */}
         <main className="menu-main">
           {/* Menu Controls (UI Only) */}
-          <div className="menu-controls">
+          <div className="menu-controls"> 
             <div className="search-box">
               <input type="text" placeholder="Search for dishes..." />
               <Search size={18} />
