@@ -127,3 +127,60 @@
     }
   }
 }
+
+.pagination-container {
+  margin-top: 50px;
+  display: flex;
+  justify-content: center;
+
+  .pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    gap: 12px;
+    align-items: center;
+
+    .page-item {
+      .page-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border: 1px solid #e0e0e0;
+        border-radius: 50%;
+        color: #333;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        background-color: white;
+
+        &:hover {
+          border-color: #ffb800;
+          color: #ffb800;
+        }
+      }
+
+      &.active .page-link {
+        background-color: #333;
+        border-color: #333;
+        color: #fff;
+      }
+
+      // Căn chỉnh riêng cho nút icon Previous/Next
+      &.previous, &.next {
+        .page-link {
+          background-color: #f8f9fa;
+          svg {
+            display: block;
+          }
+        }
+        
+        &.disabled .page-link {
+          color: #ccc;
+          cursor: not-allowed;
+          opacity: 0.5;
+        }
+      }
+    }
+  }
+}
