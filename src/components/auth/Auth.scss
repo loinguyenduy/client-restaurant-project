@@ -1,0 +1,115 @@
+.auth-page {
+  /* Nền trang màu xám cực nhạt để làm nổi bật form trắng */
+  background-color: #F8FAFC; 
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+
+  .auth-box {
+    background-color: #FFFFFF; /* Form màu trắng tinh */
+    padding: 40px 35px;
+    border-radius: 16px; /* Bo góc to, mềm mại hơn */
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); /* Bóng mờ nhẹ nhàng */
+
+    h2 {
+      text-align: center;
+      color: var(--primary-navy); /* Tiêu đề màu Navy đậm */
+      margin-bottom: 30px;
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .input-group {
+      margin-bottom: 20px;
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        color: #334155; /* Label màu xám đá */
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 12px 15px;
+        background-color: #FFFFFF;
+        border: 1px solid #E2E8F0; /* Viền input xám nhạt */
+        border-radius: 8px;
+        color: var(--primary-navy);
+        font-size: 15px;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+
+        &:focus {
+          outline: none;
+          border-color: var(--primary-navy);
+          /* Hiệu ứng viền focus màu Navy nhạt */
+          box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1); 
+        }
+
+        &::placeholder {
+          color: #94A3B8;
+        }
+      }
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background-color: var(--primary-navy); /* Nút bấm màu Navy */
+      color: #FFFFFF;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-top: 10px;
+
+      &:hover {
+        background-color: #1E293B; /* Sáng lên một chút khi hover */
+      }
+
+      &:disabled {
+        background-color: #94A3B8;
+        cursor: not-allowed;
+      }
+    }
+
+    .switch-page {
+      text-align: center;
+      margin-top: 25px;
+      color: #64748B;
+      font-size: 14.5px;
+
+      span {
+        color: var(--primary-navy);
+        cursor: pointer;
+        font-weight: 600;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 480px) {
+  .auth-page {
+    padding: 15px;
+    .auth-box {
+      padding: 30px 20px;
+      h2 {
+        font-size: 24px;
+      }
+    }
+  }
+}

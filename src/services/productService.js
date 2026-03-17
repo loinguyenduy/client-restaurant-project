@@ -1,7 +1,7 @@
 import axios from "../utils/axios.js"
 
 const getAllProducts = (options) => {
-  return axios.get(`api/v1/get-all-products`, {
+  return axios.get(`/get-all-products`, {
     params: options 
   });
 }
