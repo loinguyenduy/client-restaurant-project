@@ -1,8 +1,9 @@
 .menu-page {
   .menu-banner {
     height: 300px;
-    background: linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.8)),
-                url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1600');
+    background:
+      linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.8)),
+      url("https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1600");
     background-size: cover;
     background-position: center;
     display: flex;
@@ -12,8 +13,17 @@
     color: #fff;
     margin-bottom: 50px;
 
-    h1 { font-size: 3rem; letter-spacing: 5px; color: var(--accent-gold); }
-    p { font-size: 1.1rem; letter-spacing: 2px; text-transform: uppercase; opacity: 0.8; }
+    h1 {
+      font-size: 3rem;
+      letter-spacing: 5px;
+      color: var(--accent-gold);
+    }
+    p {
+      font-size: 1.1rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      opacity: 0.8;
+    }
   }
 
   .menu-container {
@@ -44,7 +54,8 @@
       transition: all 0.3s;
       border-bottom: 1px solid #eee;
 
-      &:hover, &.active {
+      &:hover,
+      &.active {
         color: var(--accent-gold);
         padding-left: 10px;
       }
@@ -58,7 +69,7 @@
       display: flex;
       justify-content: space-between;
       margin-bottom: 30px;
-      
+
       .search-box {
         position: relative;
         width: 300px;
@@ -68,10 +79,21 @@
           border: 1px solid #ddd;
           border-radius: 5px;
         }
-        svg { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #999; }
+        svg {
+          position: absolute;
+          right: 15px;
+          top: 50%;
+          transform: translateY(-50%);
+          color: #999;
+        }
       }
 
-      select { padding: 10px; border: 1px solid #ddd; border-radius: 5px; color: #666; }
+      select {
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        color: #666;
+      }
     }
 
     .product-grid {
@@ -84,20 +106,24 @@
       background: #fff;
       border-radius: 10px;
       overflow: hidden;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
       transition: transform 0.3s;
 
-      &:hover {
-        transform: translateY(-10px);
-        .add-to-cart-btn { opacity: 1; bottom: 20px; }
-      }
+      // &:hover {
+      //   transform: translateY(-10px);
+      //   .add-to-cart-btn { opacity: 1; bottom: 20px; }
+      // }
 
       .product-image {
         height: 220px;
         position: relative;
         overflow: hidden;
-        img { width: 100%; height: 100%; object-fit: cover; }
-        
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
         .add-to-cart-btn {
           position: absolute;
           bottom: -50px;
@@ -119,9 +145,94 @@
 
       .product-info {
         padding: 20px;
-        .product-name { font-size: 1.2rem; color: var(--primary-navy); margin-bottom: 10px; }
-        .product-desc { font-size: 0.9rem; color: #777; margin-bottom: 15px; height: 40px; overflow: hidden; }
-        .product-price { font-size: 1.3rem; font-weight: 800; color: var(--accent-gold); }
+        .product-name {
+          font-size: 1.2rem;
+          color: var(--primary-navy);
+          margin-bottom: 10px;
+        }
+        .product-desc {
+          font-size: 0.9rem;
+          color: #777;
+          margin-bottom: 15px;
+          height: 40px;
+          overflow: hidden;
+        }
+        .product-price {
+          font-size: 1.3rem;
+          font-weight: 800;
+          color: var(--accent-gold);
+        }
+        .cart-action-group {
+          display: flex;
+          align-items: center;
+          justify-content: space-between; 
+          margin-top: 15px;
+
+          .quantity-control {
+            display: flex;
+            align-items: center;
+            border: 1px solid var(--input-border, #cbd5e1); 
+            border-radius: 6px;
+            overflow: hidden; 
+
+            .qty-btn {
+              background-color: transparent;
+              border: none;
+              padding: 8px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              cursor: pointer;
+              color: var(--primary-navy, #0f172a);
+              transition: background-color 0.2s;
+
+              &:hover {
+                background-color: #f1f5f9;
+              }
+            }
+
+            .qty-input {
+              width: 40px;
+              text-align: center;
+              border: none;
+              border-left: 1px solid var(--input-border, #cbd5e1);
+              border-right: 1px solid var(--input-border, #cbd5e1);
+              padding: 8px 0;
+              font-size: 14px;
+              font-weight: 500;
+              color: var(--primary-navy, #0f172a);
+
+              &::-webkit-outer-spin-button,
+              &::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+              }
+              -moz-appearance: textfield;
+
+              &:focus {
+                outline: none;
+              }
+            }
+          }
+
+          .add-to-cart-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--accent-gold, #d4af37);
+            color: white; 
+            border: none;
+            padding: 10px 15px; 
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+
+            &:hover {
+              background-color: #b5952f; 
+              transform: translateY(-2px);
+            }
+          }
+        }
       }
     }
   }
@@ -166,14 +277,15 @@
       }
 
       // Căn chỉnh riêng cho nút icon Previous/Next
-      &.previous, &.next {
+      &.previous,
+      &.next {
         .page-link {
           background-color: #f8f9fa;
           svg {
             display: block;
           }
         }
-        
+
         &.disabled .page-link {
           color: #ccc;
           cursor: not-allowed;

@@ -1,16 +1,31 @@
 import React, { useEffect, useState } from "react";
-import { Search, ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, ShoppingCart, ChevronLeft, ChevronRight, Plus, Minus } from "lucide-react";
 import ReactPaginate from "react-paginate";
-import "./Menu.scss";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { toast } from "react-toastify";
+
 import { getAllCategories } from "../../services/categoryService";
 import { getAllProducts } from "../../services/productService";
-import { useSearchParams } from "react-router-dom";
+import { addToCartApi } from "../../services/cartService"; 
+import { doAddToCart } from "../../redux/actions/cartAction"; 
+
+import "./Menu.scss";
 
 const Menu = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  // Get authentication status from Redux store
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams();
   const [totalPages, setTotalPages] = useState(0);
+
+  // State to manage quantities for each product
+  const [quantities, setQuantities] = useState({});
 
   const currentCategory = searchParams.get("category") || "all";
   const currentSearch = searchParams.get("search") || "";
@@ -27,7 +42,6 @@ const Menu = () => {
     fetchProducts();
   }, [searchParams]);
 
-  // Debounce search logic: search function will be active when user stop enter input about 500ms
   useEffect(() => {
     const timer = setTimeout(() => {
       updateSearchParams("search", searchInput, true);
@@ -57,21 +71,63 @@ const Menu = () => {
 
   const updateSearchParams = (key, value, resetPage = false) => {
     setSearchParams((prev) => {
-      if (!value || value === "all") {
-        prev.delete(key);
-      } else {
-        prev.set(key, value);
-      }
-
-      if (resetPage) {
-        prev.delete("page");
-      }
+      if (!value || value === "all") prev.delete(key);
+      else prev.set(key, value);
+      
+      if (resetPage) prev.delete("page");
       return prev;
     });
   };
 
   const handlePageClick = (event) => {
     updateSearchParams("page", event.selected + 1);
+  };
+
+  // function to handle quantity changes 
+  const handleQuantityChange = (productId, value, isInput = false) => {
+    setQuantities((prev) => {
+      const currentQty = prev[productId] || 1;
+      let newQty;
+
+      if (isInput) {
+        newQty = parseInt(value);
+        if (isNaN(newQty) || newQty < 1) newQty = 1; 
+      } else {
+        newQty = currentQty + value;
+        if (newQty < 1) newQty = 1; 
+      }
+
+      return { ...prev, [productId]: newQty };
+    });
+  };
+
+  // function to handle adding products to cart
+  const handleAddToCart = async (product) => {
+    if (!isAuthenticated) {
+      toast.info("Please log in to add items to your cart.");
+      navigate("/login");
+      return;
+    }
+
+    const qtyToAdd = quantities[product.id] || 1; // get the quantity for this product, default to 1 if not set
+
+    try {
+      let res = await addToCartApi(product.id, qtyToAdd);
+
+      if (res && res.EC === 0) {
+        toast.success(`Added ${qtyToAdd} ${product.name} in the cart !`);
+        //dispatch action to add item to cart in Redux store
+        dispatch(doAddToCart(product, qtyToAdd));
+
+        // reset quantity for this product back to 1 after adding to cart
+        setQuantities((prev) => ({ ...prev, [product.id]: 1 }));
+      } else {
+        toast.error(res.EM || "Failed to add item to cart.");
+      }
+    } catch (error) {
+      console.log("Error add to cart:", error);
+      toast.error("An error occurred while adding item to cart.");
+    }
   };
 
   return (
@@ -84,6 +140,7 @@ const Menu = () => {
       </section>
 
       <div className="menu-container">
+        {/* Sidebar */}
         <aside className="category-sidebar">
           <h3 className="sidebar-title">Categories</h3>
           <ul className="category-list">
@@ -105,6 +162,7 @@ const Menu = () => {
           </ul>
         </aside>
 
+        {/* Main Content */}
         <main className="menu-main">
           <div className="menu-controls">
             <div className="search-box">
@@ -119,9 +177,7 @@ const Menu = () => {
             <div className="filter-sort">
               <select
                 value={currentSort}
-                onChange={(e) =>
-                  updateSearchParams("sort", e.target.value, true)
-                }
+                onChange={(e) => updateSearchParams("sort", e.target.value, true)}
               >
                 <option value="">Sort by</option>
                 <option value="price_asc">Price: Low to High</option>
@@ -136,14 +192,45 @@ const Menu = () => {
                 <div key={product.id} className="product-card">
                   <div className="product-image">
                     <img src={product.image_url} alt={product.name} />
-                    <button className="add-to-cart-btn">
-                      <ShoppingCart size={18} /> Add to Cart
-                    </button>
                   </div>
                   <div className="product-info">
                     <h3 className="product-name">{product.name}</h3>
                     <p className="product-desc">{product.description}</p>
-                    <span className="product-price">${product.price}</span>
+                    <span className="product-price">${parseFloat(product.price).toFixed(2)}</span>
+
+                    <div className="cart-action-group">
+                      <div className="quantity-control">
+                        <button
+                          className="qty-btn"
+                          onClick={() => handleQuantityChange(product.id, -1)}
+                        >
+                          <Minus size={16} />
+                        </button>
+
+                        <input
+                          type="number"
+                          className="qty-input"
+                          value={quantities[product.id] || 1}
+                          onChange={(e) => handleQuantityChange(product.id, e.target.value, true)}
+                          min="1"
+                        />
+
+                        <button
+                          className="qty-btn"
+                          onClick={() => handleQuantityChange(product.id, 1)}
+                        >
+                          <Plus size={16} />
+                        </button>
+                      </div>
+
+                      <button
+                        className="add-to-cart-btn"
+                        onClick={() => handleAddToCart(product)}
+                      >
+                        <ShoppingCart size={18} />
+                      </button>
+                    </div>
+
                   </div>
                 </div>
               ))
@@ -152,11 +239,12 @@ const Menu = () => {
             )}
           </div>
 
+          {/* Pagination */}
           {totalPages > 1 && (
             <div className="pagination-container">
               <ReactPaginate
-                previousLabel={<ChevronLeft size={20} />} 
-                nextLabel={<ChevronRight size={20} />} 
+                previousLabel={<ChevronLeft size={20} />}
+                nextLabel={<ChevronRight size={20} />}
                 onPageChange={handlePageClick}
                 pageRangeDisplayed={3}
                 marginPagesDisplayed={2}

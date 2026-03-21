@@ -1,24 +1,26 @@
-import React, { useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import MainLayout from './components/MainLayout.js';
-import HomePage from './components/home/HomePage.js';
-import Menu from './components/menu/Menu.js';
-import Login from './components/auth/Login.js';
-import Register from './components/auth/Register.js';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css'; 
-import './index.scss';
-import { useDispatch } from 'react-redux';
-import { fetchAccountApi } from './services/authService';  
-import { doFetchAccountSuccess } from './redux/actions/authAction'; 
+import React, { useEffect } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import MainLayout from "./components/MainLayout.js";
+import HomePage from "./components/home/HomePage.js";
+import Menu from "./components/menu/Menu.js";
+import Login from "./components/auth/Login.js";
+import Register from "./components/auth/Register.js";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import "./index.scss";
+import { useDispatch } from "react-redux";
+import { fetchAccountApi } from "./services/authService";
+import { doFetchAccountSuccess } from "./redux/actions/authAction";
+import PrivateRoute from "./routes/PrivateRoute.js";
+import GuestRoute from "./routes/GuestRoute.js";
 
 function App() {
   const dispatch = useDispatch();
   useEffect(() => {
     const fetchUserSession = async () => {
       try {
-        let res = await fetchAccountApi(); 
-        
+        let res = await fetchAccountApi();
+
         if (res && res.EC === 0) {
           dispatch(doFetchAccountSuccess(res.DT));
         }
@@ -28,13 +30,27 @@ function App() {
     };
 
     fetchUserSession();
-  }, [dispatch]); 
+  }, [dispatch]);
   return (
     <>
       <BrowserRouter>
         <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route
+            path="/login"
+            element={
+              <GuestRoute>
+                <Login />
+              </GuestRoute>
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              <GuestRoute>
+                <Register />
+              </GuestRoute>
+            }
+          />
 
           <Route path="/" element={<MainLayout />}>
             <Route index element={<HomePage />} />
@@ -43,7 +59,7 @@ function App() {
         </Routes>
       </BrowserRouter>
 
-      <ToastContainer 
+      <ToastContainer
         position="top-right"
         autoClose={3000}
         hideProgressBar={false}
@@ -53,7 +69,7 @@ function App() {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme="light" 
+        theme="light"
       />
     </>
   );
