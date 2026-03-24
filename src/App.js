@@ -13,17 +13,26 @@ import { fetchAccountApi } from "./services/authService";
 import { doFetchAccountSuccess } from "./redux/actions/authAction";
 import PrivateRoute from "./routes/PrivateRoute.js";
 import GuestRoute from "./routes/GuestRoute.js";
+import { getCartApi } from "./services/cartService.js";
+import { doSetCartFromServer } from "./redux/actions/cartAction.js";
 
 function App() {
   const dispatch = useDispatch();
   useEffect(() => {
     const fetchUserSession = async () => {
       try {
+        // check token if exist and valid, fetch user info
         let res = await fetchAccountApi();
-
         if (res && res.EC === 0) {
           dispatch(doFetchAccountSuccess(res.DT));
         }
+
+        // fetch cart data if user logged in successfully 
+        let cartRes = await getCartApi();
+        if (cartRes && cartRes.EC === 0) {
+          dispatch(doSetCartFromServer(cartRes.DT));
+        }
+
       } catch (error) {
         console.log("No active session or token expired");
       }

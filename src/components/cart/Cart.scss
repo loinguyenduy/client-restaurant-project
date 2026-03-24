@@ -1,0 +1,314 @@
+/* Variables matching your theme */
+$navy-dark: #0b1121;
+$navy-light: #1e293b;
+$accent-gold: #d4af37;
+$text-gray: #64748b;
+$border-light: #e2e8f0;
+$bg-white: #ffffff;
+$bg-hover: #f8fafc;
+
+.cart-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(11, 17, 33, 0.6); // Dark overlay
+  z-index: 9998;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease-in-out;
+
+  &.show {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.cart-drawer-container {
+  position: fixed;
+  top: 0;
+  right: -500px; // Hidden completely off-screen
+  width: 100%;
+  max-width: 420px; // Good width for a side drawer
+  height: 100vh;
+  background-color: $bg-white;
+  z-index: 9999;
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  transition: right 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+  &.open {
+    right: 0; // Slide in
+  }
+
+  // HEADER
+  .drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    background-color: $navy-dark; // Dark header like your image
+    color: $bg-white;
+
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      
+      h2 { 
+        margin: 0; 
+        font-size: 18px; 
+        font-weight: 600; 
+        letter-spacing: 0.5px;
+      }
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: $bg-white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease;
+
+      &:hover { 
+        transform: scale(1.1);
+        color: $accent-gold; 
+      }
+    }
+  }
+
+  // BODY (ITEMS)
+  .drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 25px;
+    background-color: $bg-white;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: #cbd5e1;
+      border-radius: 4px;
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: $text-gray;
+
+      .empty-icon {
+        color: #cbd5e1;
+        margin-bottom: 15px;
+      }
+
+      p {
+        font-size: 16px;
+        margin-bottom: 20px;
+      }
+
+      .continue-link {
+        background: none;
+        border: none;
+        color: $navy-dark;
+        font-weight: 600;
+        font-size: 15px;
+        cursor: pointer;
+        
+        &:hover {
+          color: $accent-gold;
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+
+  // SINGLE CART ITEM
+  .cart-item-card {
+    display: flex;
+    gap: 15px;
+    padding: 15px 0;
+    border-bottom: 1px solid $border-light;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .item-image {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid $border-light;
+    }
+
+    .item-details {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+
+      .item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 4px;
+
+        .item-name {
+          margin: 0;
+          font-size: 15px;
+          font-weight: 600;
+          color: $navy-dark;
+          line-height: 1.3;
+        }
+
+        .item-price {
+          font-weight: 600;
+          color: $navy-dark;
+          font-size: 15px;
+        }
+      }
+
+      .item-category {
+        margin: 0 0 10px 0;
+        font-size: 13px;
+        color: $text-gray;
+      }
+
+      .item-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: auto;
+
+        .quantity-control {
+          display: flex;
+          align-items: center;
+          border: 1px solid $border-light;
+          border-radius: 4px;
+          background-color: $bg-white;
+
+          .qty-btn {
+            background: none;
+            border: none;
+            padding: 4px 8px;
+            cursor: pointer;
+            color: $navy-dark;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            &:hover:not(:disabled) {
+              background-color: $bg-hover;
+            }
+            &:disabled {
+              opacity: 0.5;
+              cursor: not-allowed;
+            }
+          }
+
+          .qty-number {
+            font-size: 14px;
+            font-weight: 500;
+            width: 25px;
+            text-align: center;
+            color: $navy-dark;
+          }
+        }
+
+        .remove-btn {
+          background: none;
+          border: none;
+          color: #ef4444; // Red color for remove
+          font-size: 13px;
+          cursor: pointer;
+          padding: 5px;
+
+          &:hover:not(:disabled) {
+            text-decoration: underline;
+          }
+          &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+          }
+        }
+      }
+    }
+  }
+
+  // FOOTER (SUMMARY)
+  .drawer-footer {
+    padding: 25px;
+    background-color: $bg-hover;
+    border-top: 1px solid $border-light;
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 15px;
+      color: $text-gray;
+
+      &.total-row {
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px dashed #cbd5e1;
+        font-size: 18px;
+        font-weight: 700;
+        color: $navy-dark;
+      }
+    }
+
+    .shipping-note {
+      font-size: 12px;
+      color: $text-gray;
+      margin: 15px 0;
+      text-align: left;
+    }
+
+    .checkout-btn {
+      width: 100%;
+      background-color: $navy-dark;
+      color: $bg-white;
+      border: none;
+      padding: 16px;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: $navy-light;
+      }
+    }
+
+    .continue-link {
+      display: block;
+      width: 100%;
+      text-align: center;
+      margin-top: 15px;
+      background: none;
+      border: none;
+      color: $text-gray;
+      font-size: 14px;
+      cursor: pointer;
+
+      &:hover {
+        color: $navy-dark;
+        text-decoration: underline;
+      }
+    }
+  }
+}

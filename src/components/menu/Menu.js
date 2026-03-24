@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Search, ShoppingCart, ChevronLeft, ChevronRight, Plus, Minus } from "lucide-react";
+import {
+  Search,
+  ShoppingCart,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Minus,
+} from "lucide-react";
 import ReactPaginate from "react-paginate";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -7,8 +14,8 @@ import { toast } from "react-toastify";
 
 import { getAllCategories } from "../../services/categoryService";
 import { getAllProducts } from "../../services/productService";
-import { addToCartApi } from "../../services/cartService"; 
-import { doAddToCart } from "../../redux/actions/cartAction"; 
+import { addToCartApi } from "../../services/cartService";
+import { doAddToCart } from "../../redux/actions/cartAction";
 
 import "./Menu.scss";
 
@@ -18,6 +25,7 @@ const Menu = () => {
 
   // Get authentication status from Redux store
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const cartItems = useSelector((state) => state.cart.cartItems); //get cart items from Redux to check quantities for guest users
 
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
@@ -73,7 +81,7 @@ const Menu = () => {
     setSearchParams((prev) => {
       if (!value || value === "all") prev.delete(key);
       else prev.set(key, value);
-      
+
       if (resetPage) prev.delete("page");
       return prev;
     });
@@ -83,50 +91,78 @@ const Menu = () => {
     updateSearchParams("page", event.selected + 1);
   };
 
-  // function to handle quantity changes 
-  const handleQuantityChange = (productId, value, isInput = false) => {
+  // function to handle quantity changes
+  const handleQuantityChange = (product, value, isInput = false) => {
     setQuantities((prev) => {
-      const currentQty = prev[productId] || 1;
+      const currentQty = prev[product.id] || 1;
       let newQty;
 
       if (isInput) {
         newQty = parseInt(value);
-        if (isNaN(newQty) || newQty < 1) newQty = 1; 
+        if (isNaN(newQty) || newQty < 1) newQty = 1;
       } else {
         newQty = currentQty + value;
-        if (newQty < 1) newQty = 1; 
+        if (newQty < 1) newQty = 1;
       }
 
-      return { ...prev, [productId]: newQty };
+      if (newQty > product.stock_quantity) {
+        toast.warning(
+          `We only have ${product.stock_quantity} portions of ${product.name} left!`,
+        );
+        newQty = product.stock_quantity; 
+      }
+
+      return { ...prev, [product.id]: newQty };
     });
   };
 
   // function to handle adding products to cart
   const handleAddToCart = async (product) => {
-    if (!isAuthenticated) {
-      toast.info("Please log in to add items to your cart.");
-      navigate("/login");
-      return;
-    }
+    // if (!isAuthenticated) {
+    //   toast.info("Please log in to add items to your cart.");
+    //   navigate("/login");
+    //   return;
+    // }
 
     const qtyToAdd = quantities[product.id] || 1; // get the quantity for this product, default to 1 if not set
 
-    try {
-      let res = await addToCartApi(product.id, qtyToAdd);
+    //if user is authenticated, call API to save in Database
+    if (isAuthenticated) {
+      try {
+        // Gọi API lưu vào Database
+        let res = await addToCartApi(product.id, qtyToAdd);
 
-      if (res && res.EC === 0) {
-        toast.success(`Added ${qtyToAdd} ${product.name} in the cart !`);
-        //dispatch action to add item to cart in Redux store
-        dispatch(doAddToCart(product, qtyToAdd));
-
-        // reset quantity for this product back to 1 after adding to cart
-        setQuantities((prev) => ({ ...prev, [product.id]: 1 }));
-      } else {
-        toast.error(res.EM || "Failed to add item to cart.");
+        if (res && res.EC === 0) {
+          toast.success(`Added ${qtyToAdd} ${product.name} to your cart!`);
+          // Cập nhật lên Redux để giao diện nhảy số lượng
+          dispatch(doAddToCart(product, qtyToAdd));
+          setQuantities((prev) => ({ ...prev, [product.id]: 1 }));
+        } else {
+          toast.error(res.EM || "Could not add to cart.");
+        }
+      } catch (error) {
+        toast.error("Server error. Please try again.");
       }
-    } catch (error) {
-      console.log("Error add to cart:", error);
-      toast.error("An error occurred while adding item to cart.");
+    }
+    // if guest user, only save in Redux 
+    else {
+      const existingItem = cartItems.find(
+        (item) => item.product_id === product.id,
+      );
+      const currentQtyInCart = existingItem ? existingItem.quantity : 0;
+
+      if (currentQtyInCart + qtyToAdd > product.stock_quantity) {
+        toast.warning(
+          `You already have ${currentQtyInCart} in cart. We only have ${product.stock_quantity} left!`,
+        );
+        return; 
+      }
+
+      dispatch(doAddToCart(product, qtyToAdd));
+      toast.success(
+        `Added ${qtyToAdd} ${product.name} to your temporary cart!`,
+      );
+      setQuantities((prev) => ({ ...prev, [product.id]: 1 }));
     }
   };
 
@@ -177,7 +213,9 @@ const Menu = () => {
             <div className="filter-sort">
               <select
                 value={currentSort}
-                onChange={(e) => updateSearchParams("sort", e.target.value, true)}
+                onChange={(e) =>
+                  updateSearchParams("sort", e.target.value, true)
+                }
               >
                 <option value="">Sort by</option>
                 <option value="price_asc">Price: Low to High</option>
@@ -196,13 +234,15 @@ const Menu = () => {
                   <div className="product-info">
                     <h3 className="product-name">{product.name}</h3>
                     <p className="product-desc">{product.description}</p>
-                    <span className="product-price">${parseFloat(product.price).toFixed(2)}</span>
+                    <span className="product-price">
+                      ${parseFloat(product.price).toFixed(2)}
+                    </span>
 
                     <div className="cart-action-group">
                       <div className="quantity-control">
                         <button
                           className="qty-btn"
-                          onClick={() => handleQuantityChange(product.id, -1)}
+                          onClick={() => handleQuantityChange(product, -1)}
                         >
                           <Minus size={16} />
                         </button>
@@ -211,13 +251,15 @@ const Menu = () => {
                           type="number"
                           className="qty-input"
                           value={quantities[product.id] || 1}
-                          onChange={(e) => handleQuantityChange(product.id, e.target.value, true)}
+                          onChange={(e) =>
+                            handleQuantityChange(product, e.target.value, true)
+                          }
                           min="1"
                         />
 
                         <button
                           className="qty-btn"
-                          onClick={() => handleQuantityChange(product.id, 1)}
+                          onClick={() => handleQuantityChange(product, 1)}
                         >
                           <Plus size={16} />
                         </button>
@@ -230,7 +272,6 @@ const Menu = () => {
                         <ShoppingCart size={18} />
                       </button>
                     </div>
-
                   </div>
                 </div>
               ))
