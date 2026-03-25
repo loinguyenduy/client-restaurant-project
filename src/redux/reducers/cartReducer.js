@@ -34,7 +34,7 @@ const cartReducer = (state = INITIAL_STATE, action) => {
         });
       }
 
-        return {
+      return {
         ...state,
         cartItems: cloneCart,
       };
@@ -78,7 +78,7 @@ const cartReducer = (state = INITIAL_STATE, action) => {
       return {
         ...state,
         //if action.payload == true/false => set isCartOpen = true/false
-        //if action.payload == undefined => toggle isCartOpen current value 
+        //if action.payload == undefined => toggle isCartOpen current value
         isCartOpen:
           action.payload !== undefined ? action.payload : !state.isCartOpen,
       };
@@ -88,6 +88,8 @@ const cartReducer = (state = INITIAL_STATE, action) => {
       //action.payload is the cart data returned from server when user login
       //action.payload: { items: [{ product_id, quantity, Product: {...} }, ...] }
       // replace current cartItems with the latest cart data from server
+      // console.log(">>> CHECK CART DATA FROM SERVER: ", action.payload);
+
       return {
         ...state,
         cartItems: action.payload.items || [],
