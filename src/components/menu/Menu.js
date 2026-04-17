@@ -1,37 +1,41 @@
 import React, { useEffect, useState } from "react";
-import { Search, ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import ReactPaginate from "react-paginate";
-import "./Menu.scss";
+import { useSearchParams } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { toast } from "react-toastify";
+
 import { getAllCategories } from "../../services/categoryService";
 import { getAllProducts } from "../../services/productService";
-import { useSearchParams } from "react-router-dom";
+import { addToCartApi } from "../../services/cartService";
+import { doAddToCart } from "../../redux/actions/cartAction";
+import ProductCard from "./ProductCard";
+import ProductModal from "./ProductModal";
+import "./Menu.scss";
 
 const Menu = () => {
+  const dispatch = useDispatch();
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const cartItems = useSelector((state) => state.cart.cartItems);
+
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams();
   const [totalPages, setTotalPages] = useState(0);
+  const [searchInput, setSearchInput] = useState(searchParams.get("search") || "");
+
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   const currentCategory = searchParams.get("category") || "all";
-  const currentSearch = searchParams.get("search") || "";
   const currentSort = searchParams.get("sort") || "";
   const currentPage = searchParams.get("page") || 1;
 
-  const [searchInput, setSearchInput] = useState(currentSearch);
+  useEffect(() => { fetchCategories(); }, []);
+  useEffect(() => { fetchProducts(); }, [searchParams]);
 
+  // Debounce search input to avoid too many API calls
   useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  useEffect(() => {
-    fetchProducts();
-  }, [searchParams]);
-
-  // Debounce search logic: search function will be active when user stop enter input about 500ms
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      updateSearchParams("search", searchInput, true);
-    }, 500);
+    const timer = setTimeout(() => { updateSearchParams("search", searchInput, true); }, 500);
     return () => clearTimeout(timer);
   }, [searchInput]);
 
@@ -42,11 +46,7 @@ const Menu = () => {
 
   const fetchProducts = async () => {
     const options = {
-      category_id: currentCategory,
-      search: currentSearch,
-      sort: currentSort,
-      page: currentPage,
-      limit: 9,
+      category_id: currentCategory, search: searchParams.get("search") || "", sort: currentSort, page: currentPage, limit: 9,
     };
     let res = await getAllProducts(options);
     if (res && res.EC === 0) {
@@ -57,25 +57,51 @@ const Menu = () => {
 
   const updateSearchParams = (key, value, resetPage = false) => {
     setSearchParams((prev) => {
-      if (!value || value === "all") {
-        prev.delete(key);
-      } else {
-        prev.set(key, value);
-      }
-
-      if (resetPage) {
-        prev.delete("page");
-      }
+      if (!value || value === "all") prev.delete(key);
+      else prev.set(key, value);
+      if (resetPage) prev.delete("page");
       return prev;
     });
   };
 
-  const handlePageClick = (event) => {
-    updateSearchParams("page", event.selected + 1);
+  // Handle adding to cart 
+  const handleAddToCart = async (product, qtyToAdd) => {
+    if (isAuthenticated) {
+      try {
+        let res = await addToCartApi(product.id, qtyToAdd);
+        if (res && res.EC === 0) {
+          toast.success(`Added ${qtyToAdd} ${product.name} to your cart!`);
+          dispatch(doAddToCart(product, qtyToAdd));
+        } else {
+          toast.error(res.EM || "Could not add to cart.");
+        }
+      } catch (error) {
+        toast.error("Server error. Please try again.");
+      }
+    } else {
+      const existingItem = cartItems.find((item) => item.product_id === product.id);
+      const currentQtyInCart = existingItem ? existingItem.quantity : 0;
+
+      if (currentQtyInCart + qtyToAdd > product.stock_quantity) {
+        toast.warning(`You already have ${currentQtyInCart} in cart. We only have ${product.stock_quantity} left!`);
+        return;
+      }
+
+      dispatch(doAddToCart(product, qtyToAdd));
+      toast.success(`Added ${qtyToAdd} ${product.name} to your temporary cart!`);
+    }
   };
 
   return (
     <div className="menu-page">
+      {/* Modal mounts here. It only shows if selectedProduct is not null */}
+      <ProductModal 
+        product={selectedProduct} 
+        categories={categories} 
+        onClose={() => setSelectedProduct(null)} 
+        onAddToCart={handleAddToCart}
+      />
+
       <section className="menu-banner">
         <div className="banner-content">
           <h1>OUR MENU</h1>
@@ -87,20 +113,9 @@ const Menu = () => {
         <aside className="category-sidebar">
           <h3 className="sidebar-title">Categories</h3>
           <ul className="category-list">
-            <li
-              className={currentCategory === "all" ? "active" : ""}
-              onClick={() => updateSearchParams("category", "all", true)}
-            >
-              All Items
-            </li>
+            <li className={currentCategory === "all" ? "active" : ""} onClick={() => updateSearchParams("category", "all", true)}>All Items</li>
             {categories.map((item) => (
-              <li
-                key={item.id}
-                className={item.id === currentCategory ? "active" : ""}
-                onClick={() => updateSearchParams("category", item.id, true)}
-              >
-                {item.name}
-              </li>
+              <li key={item.id} className={item.id === currentCategory ? "active" : ""} onClick={() => updateSearchParams("category", item.id, true)}>{item.name}</li>
             ))}
           </ul>
         </aside>
@@ -108,21 +123,11 @@ const Menu = () => {
         <main className="menu-main">
           <div className="menu-controls">
             <div className="search-box">
-              <input
-                type="text"
-                placeholder="Search dishes..."
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-              />
+              <input type="text" placeholder="Search dishes..." value={searchInput} onChange={(e) => setSearchInput(e.target.value)} />
               <Search size={18} />
             </div>
             <div className="filter-sort">
-              <select
-                value={currentSort}
-                onChange={(e) =>
-                  updateSearchParams("sort", e.target.value, true)
-                }
-              >
+              <select value={currentSort} onChange={(e) => updateSearchParams("sort", e.target.value, true)}>
                 <option value="">Sort by</option>
                 <option value="price_asc">Price: Low to High</option>
                 <option value="price_desc">Price: High to Low</option>
@@ -130,49 +135,33 @@ const Menu = () => {
             </div>
           </div>
 
+          {/* Rendering product card */}
           <div className="product-grid">
             {products.length > 0 ? (
               products.map((product) => (
-                <div key={product.id} className="product-card">
-                  <div className="product-image">
-                    <img src={product.image_url} alt={product.name} />
-                    <button className="add-to-cart-btn">
-                      <ShoppingCart size={18} /> Add to Cart
-                    </button>
-                  </div>
-                  <div className="product-info">
-                    <h3 className="product-name">{product.name}</h3>
-                    <p className="product-desc">{product.description}</p>
-                    <span className="product-price">${product.price}</span>
-                  </div>
-                </div>
+                <ProductCard 
+                  key={product.id} 
+                  product={product} 
+                  onAddToCart={handleAddToCart} 
+                  onOpenModal={(prod) => setSelectedProduct(prod)} 
+                />
               ))
             ) : (
               <p className="no-data">No products found.</p>
             )}
           </div>
 
+          {/* Pagination */}
           {totalPages > 1 && (
             <div className="pagination-container">
               <ReactPaginate
-                previousLabel={<ChevronLeft size={20} />} 
-                nextLabel={<ChevronRight size={20} />} 
-                onPageChange={handlePageClick}
-                pageRangeDisplayed={3}
-                marginPagesDisplayed={2}
-                pageCount={totalPages}
-                pageClassName="page-item"
-                pageLinkClassName="page-link"
-                previousClassName="page-item previous"
-                previousLinkClassName="page-link"
-                nextClassName="page-item next"
-                nextLinkClassName="page-link"
-                breakLabel="..."
-                breakClassName="page-item"
-                breakLinkClassName="page-link"
-                containerClassName="pagination"
-                activeClassName="active"
-                renderOnZeroPageCount={null}
+                previousLabel={<ChevronLeft size={20} />} nextLabel={<ChevronRight size={20} />}
+                onPageChange={(e) => updateSearchParams("page", e.selected + 1)}
+                pageRangeDisplayed={3} marginPagesDisplayed={2} pageCount={totalPages}
+                pageClassName="page-item" pageLinkClassName="page-link" previousClassName="page-item previous"
+                previousLinkClassName="page-link" nextClassName="page-item next" nextLinkClassName="page-link"
+                breakLabel="..." breakClassName="page-item" breakLinkClassName="page-link"
+                containerClassName="pagination" activeClassName="active" renderOnZeroPageCount={null}
                 forcePage={+currentPage - 1}
               />
             </div>

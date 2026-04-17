@@ -1,5 +1,6 @@
 import axios from "axios";
 import store from "../redux/store.js";
+import { USER_LOGOUT_SUCCESS, FETCH_USER_LOGIN_SUCCESS } from '../redux/actions/authAction';
 
 const instance = axios.create({
   baseURL: "http://localhost:8080/api/v1",

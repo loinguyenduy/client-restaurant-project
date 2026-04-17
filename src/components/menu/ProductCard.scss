@@ -1,0 +1,151 @@
+
+.product-card {
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s, box-shadow 0.3s;
+  display: flex;
+  flex-direction: column;
+
+  &:hover {
+    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.1);
+  }
+
+  .product-image {
+    height: 220px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer; 
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+    
+    &:hover img {
+      transform: scale(1.05); 
+    }
+
+    /* NHÃN SIGNATURE */
+    .signature-badge {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      background-color: #ff7b00; 
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 4px 8px;
+      border-radius: 4px;
+      z-index: 2;
+      letter-spacing: 0.5px;
+    }
+  }
+
+  .product-info {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+
+    .product-name {
+      font-size: 1.2rem;
+      color: var(--primary-navy);
+      margin-bottom: 10px;
+      cursor: pointer; // Có thể bấm vào tên để mở Modal
+      
+      &:hover {
+        color: var(--accent-gold);
+      }
+    }
+
+    .product-desc {
+      font-size: 0.9rem;
+      color: #777;
+      margin-bottom: 15px;
+      height: 40px;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .product-price {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--primary-navy); // Sửa lại thành màu đen theo mẫu thiết kế
+    }
+
+    .cart-action-group {
+      display: flex;
+      align-items: center;
+      justify-content: space-between; 
+      margin-top: auto; // Đẩy nhóm nút xuống đáy
+      padding-top: 15px;
+
+      .quantity-control {
+        display: flex;
+        align-items: center;
+        border: 1px solid #cbd5e1; 
+        border-radius: 6px;
+        overflow: hidden; 
+
+        .qty-btn {
+          background-color: transparent;
+          border: none;
+          padding: 8px 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          color: var(--primary-navy);
+          transition: background-color 0.2s;
+
+          &:hover { background-color: #f1f5f9; }
+        }
+
+        .qty-input {
+          width: 40px;
+          text-align: center;
+          border: none;
+          border-left: 1px solid #cbd5e1;
+          border-right: 1px solid #cbd5e1;
+          padding: 8px 0;
+          font-size: 14px;
+          font-weight: 500;
+          color: var(--primary-navy);
+
+          &::-webkit-outer-spin-button,
+          &::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+          }
+          -moz-appearance: textfield;
+
+          &:focus { outline: none; }
+        }
+      }
+
+      .add-to-cart-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--accent-gold);
+        color: white; 
+        border: none;
+        padding: 10px 15px; 
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s;
+
+        &:hover {
+          background-color: #b5952f; 
+          transform: translateY(-2px);
+        }
+      }
+    }
+  }
+}
