@@ -1,7 +1,9 @@
 import axios from "../utils/axios.js"
 
-const getAllProducts = (categoryId) => {
-  return axios.get("api/v1/get-all-products", {params: {category_id: categoryId}})
+const getAllProducts = (options) => {
+  return axios.get(`/get-all-products`, {
+    params: options 
+  });
 }
 
 export {

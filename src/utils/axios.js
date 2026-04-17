@@ -1,38 +1,73 @@
-import axios from 'axios';
+import axios from "axios";
+import store from "../redux/store.js";
 
 const instance = axios.create({
-    baseURL: 'http://localhost:8080', 
-    // withCredentials: true 
+  baseURL: "http://localhost:8080/api/v1",
+  withCredentials: true,
 });
 
-
-// Alter defaults after instance has been created
-// instance.defaults.headers.common["Authorization"] = "AUTH_TOKEN 12321321";
-
-// Add a request interceptor
+// 2. Request Interceptor
 instance.interceptors.request.use(
   function (config) {
-    // Do something before request is sent
+    const token = store.getState().auth.token;
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   },
   function (error) {
-    // Do something with request error
     return Promise.reject(error);
-  }
+  },
 );
 
-// Add a response interceptor
 instance.interceptors.response.use(
   function (response) {
-    // Any status code that lie within the range of 2xx cause this function to trigger
-    // Do something with response data
-    return response.data;
+    return response && response.data ? response.data : response;
   },
-  function (error) {
-    // Any status codes that falls outside the range of 2xx cause this function to trigger
-    // Do something with response error
-    return Promise.reject(error);
-  }
+  async function (error) {
+    const originalRequest = error.config;
+
+    if (
+      error.response &&
+      error.response.status === 401 &&
+      !originalRequest._retry
+    ) {
+      if (
+        originalRequest.url === "/refresh" ||
+        originalRequest.url === "/login"
+      ) {
+        return Promise.reject(error);
+      }
+
+      originalRequest._retry = true;
+
+      try {
+        const res = await instance.post("/refresh");
+
+        if (res && res.EC === 0) {
+          store.dispatch({
+            type: FETCH_USER_LOGIN_SUCCESS,
+            payload: res.DT,
+          });
+
+          originalRequest.headers.Authorization = `Bearer ${res.DT.accessToken}`;
+
+          return instance(originalRequest);
+        } else {
+          store.dispatch({ type: USER_LOGOUT_SUCCESS });
+          return Promise.reject(error);
+        }
+      } catch (refreshError) {
+        store.dispatch({ type: USER_LOGOUT_SUCCESS });
+        return Promise.reject(refreshError);
+      }
+    }
+
+    return error && error.response && error.response.data
+      ? Promise.reject(error.response.data)
+      : Promise.reject(error);
+  },
 );
 
 export default instance;
