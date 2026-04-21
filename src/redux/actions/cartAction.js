@@ -10,7 +10,7 @@ export const doAddToCart = (product, quantity) => {
     type: ADD_TO_CART,
     payload: { product, quantity },
   };
-}
+};
 
 export const doUpdateCartItem = (productId, newQuantity) => {
   return {
@@ -29,7 +29,7 @@ export const doRemoveCartItem = (productId) => {
 export const doToggleCart = (isOpen) => {
   return {
     type: TOGGLE_CART_DRAWER,
-    payload: isOpen, 
+    payload: isOpen,
   };
 };
 
