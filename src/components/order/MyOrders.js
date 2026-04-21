@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { getUserOrdersApi, rePayOrderApi } from '../../services/orderService';
 import './MyOrders.scss';
+import { useNavigate } from 'react-router-dom';
 
 const MyOrders = () => {
+    const navigate = useNavigate();
     const [orders, setOrders] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [isRepaying, setIsRepaying] = useState(null); // Lưu ID của đơn hàng đang được xử lý re-pay
+    const [isRepaying, setIsRepaying] = useState(null); // save orderId to disable button while processing
 
     useEffect(() => {
         fetchOrders();
@@ -28,20 +30,19 @@ const MyOrders = () => {
         setIsLoading(false);
     };
 
-    // Hàm định dạng ngày tháng (VD: Apr 21, 2026)
+    // format date helper function
     const formatDate = (dateString) => {
         const options = { year: 'numeric', month: 'short', day: 'numeric' };
         return new Date(dateString).toLocaleDateString('en-US', options);
     };
 
-    // Xử lý nút Thanh toán lại
+    // handle re-pay for pending orders
     const handleRePay = async (orderId) => {
         setIsRepaying(orderId);
         try {
             const res = await rePayOrderApi(orderId);
             if (res && res.EC === 0 && res.DT) {
-                // Chuyển hướng sang trang PayOS mới
-                window.location.href = res.DT;
+                window.location.href = res.DT; // redirect to new payment link
             } else {
                 toast.error(res.EM || "Cannot create payment link.");
             }
@@ -86,33 +87,30 @@ const MyOrders = () => {
                                     </div>
                                     <div className="info-group">
                                         <span className="label">Order #</span>
-                                        {/* Hiển thị 8 ký tự đầu của UUID cho gọn */}
                                         <span className="value">{order.id.substring(0, 8).toUpperCase()}</span>
                                     </div>
                                 </div>
-                                <div className={`status-badge ${order.payment_status}`}>
-                                    {order.payment_status.charAt(0).toUpperCase() + order.payment_status.slice(1)}
+                                <div className={`status-badge ${order.order_status}`}>
+                                    {order.order_status.charAt(0).toUpperCase() + order.order_status.slice(1)}
                                 </div>
                             </div>
 
                             {/* --- BODY --- */}
                             <div className="card-body">
                                 
-                                {/* Cột trái: Danh sách sản phẩm */}
                                 <div className="items-list">
                                     {order.OrderItems && order.OrderItems.map((item) => (
                                         <div className="order-item" key={item.id}>
                                             <img src={item.Product?.image_url} alt={item.Product?.name} />
                                             <div className="item-details">
                                                 <h4>{item.Product?.name}</h4>
-                                                <div className="qty">Qty: {item.quantity}</div>
+                                                <div className="qty">Quantity: {item.quantity}</div>
                                                 <div className="price">${parseFloat(item.price).toFixed(2)}</div>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
 
-                                {/* Cột phải: Order Summary Box */}
                                 <div className="order-summary-box">
                                     <h4>Order Details</h4>
                                     
@@ -138,7 +136,6 @@ const MyOrders = () => {
                                     </div>
 
                                     <div className="action-buttons">
-                                        {/* CHỈ hiện nút Pay Now nếu đang dùng PayOS/Card và trạng thái là Pending */}
                                         {order.payment_status === 'pending' && (order.payment_method === 'card' || order.payment_method === 'payos') && (
                                             <button 
                                                 className="btn-repay" 
@@ -148,7 +145,12 @@ const MyOrders = () => {
                                                 {isRepaying === order.id ? 'Processing...' : 'Pay Now'}
                                             </button>
                                         )}
-                                        <button className="btn-invoice">View Invoice</button>
+                                        <button 
+                                            className="btn-invoice" 
+                                            onClick={() => navigate('/invoice', { state: { order: order } })}
+                                        >
+                                            View Invoice
+                                        </button>
                                     </div>
                                 </div>
 

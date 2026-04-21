@@ -50,7 +50,7 @@ const CheckoutForm = ({ formData, handleInputChange, handleMethodChange, handleS
                     <span>Cash on Delivery</span>
                 </div>
                 
-                {/* Tương lai tích hợp VNPay vào đây */}
+                {/* vnpay not yet implemented */}
                 <div 
                     className={`method-card ${formData.payment_method === 'vnpay' ? 'active' : ''}`}
                     onClick={() => handleMethodChange('vnpay')}

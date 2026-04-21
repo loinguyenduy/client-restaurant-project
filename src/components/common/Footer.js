@@ -23,17 +23,17 @@ const Footer = () => {
         <div className="footer-section hours">
           <h3 className="footer-title">OPENING HOURS</h3>
           <ul>
-            <li><span>Monday – Friday:</span> 09:00 AM – 10:00 PM</li>
-            <li><span>Saturday – Sunday:</span> 10:00 AM – 11:00 PM</li>
-            <li className="note">Happy Hours: 05:00 PM – 07:00 PM</li>
+            <li><span>Monday - Friday:</span> 09:00 AM - 10:00 PM</li>
+            <li><span>Saturday - Sunday:</span> 10:00 AM - 11:00 PM</li>
+            <li className="note">Happy Hours: 05:00 PM - 07:00 PM</li>
           </ul>
         </div>
 
         <div className="footer-section contact">
           <h3 className="footer-title">CONTACT INFO</h3>
           <ul>
-            <li><MapPin size={18} /> 123 Luxury Street, New York, USA</li>
-            <li><Phone size={18} /> +1 (234) 567-890</li>
+            <li><MapPin size={18} /> 123 Ho Tay Lake, Hanoi, Vietnam</li>
+            <li><Phone size={18} /> +84 961998670</li>
             <li><Mail size={18} /> contact@royalrestaurant.com</li>
           </ul>
         </div>

@@ -14,22 +14,21 @@ const Checkout = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    // 1. Lấy dữ liệu giỏ hàng và thông tin User từ Redux
+    // get cart items and user info from Redux store
     const { cartItems } = useSelector((state) => state.cart);
     const userAccount = useSelector((state) => state.auth.account);
 
-    // 2. Khởi tạo state cho Form. Tự động điền Phone nếu User đã có
     const [formData, setFormData] = useState({
         address: '',
         phone_receiver: userAccount?.phone_number || '', 
         note: '',
-        payment_method: 'payos', // Để mặc định là PayOS theo thiết kế
+        payment_method: 'payos', 
         type: 'online'
     });
 
     const [isLoading, setIsLoading] = useState(false);
 
-    // 3. Xử lý tính toán (Giống hệt bên CartDrawer để đảm bảo đồng bộ)
+    // calculate subtotal, tax, shipping fee, and total amount
     const calculateSubtotal = () => {
         let subtotal = 0;
         cartItems.forEach((item) => {
@@ -39,12 +38,12 @@ const Checkout = () => {
     };
 
     const subtotal = calculateSubtotal();
-    const shippingFee = 5.00; // Hardcode tạm thời giống bản thiết kế AI
+    const shippingFee = 5.00; 
     const taxRate = 0.08; 
     const taxAmount = subtotal * taxRate;
     const total = subtotal + taxAmount + shippingFee;
 
-    // Redriect nếu giỏ hàng trống (tránh user vào bằng link trực tiếp)
+    // Avoid user enter link /checkout in url when cart is empty
     useEffect(() => {
         if (!cartItems || cartItems.length === 0) {
             toast.warning("Your cart is empty!");
@@ -52,7 +51,6 @@ const Checkout = () => {
         }
     }, [cartItems, navigate]);
 
-    // 4. Các hàm xử lý thay đổi dữ liệu Form
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
@@ -62,27 +60,32 @@ const Checkout = () => {
         setFormData({ ...formData, payment_method: method });
     };
 
-    // 5. Submit Form
+    // handle form submission
     const handleSubmit = async () => {
         if (!formData.address || !formData.phone_receiver) {
             toast.error("Please fill in all required delivery details.");
             return;
         }
+        //check format phone number 
+        const phoneRegex = /^\+?[0-9\s\-()]{7,}$/;
+        if (!phoneRegex.test(formData.phone_receiver)) {
+            toast.error("Please enter a valid phone number.");
+            return;
+        }
 
         setIsLoading(true);
+
         try {
-            // Gọi API checkout đã định nghĩa ở orderService
             const res = await checkoutApi(formData);
 
             if (res && res.EC === 0) {
                 if (formData.payment_method === 'cash') {
-                    // Nếu là tiền mặt: Xóa giỏ hàng và chuyển trang Success ngay
                     dispatch(doClearCart());
                     navigate('/payment-success');
                 } else {
-                    // Nếu là thanh toán Online: Redirect sang trang của cổng thanh toán
-                    // res.DT chính là checkoutUrl của PayOS
-                    window.location.href = res.DT; 
+                    //if payment method is payos, redirect to PayOS page
+                    window.location.href = res.DT; //DT is the payment link from server
+                    // console.log("Redirecting to PayOS with URL:", res.DT); 
                 }
             } else {
                 toast.error(res.EM || "Something went wrong. Please try again.");

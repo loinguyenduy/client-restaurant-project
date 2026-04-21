@@ -7,8 +7,6 @@ const PaymentCancel = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Tự động chuyển hướng về trang Checkout sau 3 giây
-        // Giỏ hàng vẫn được giữ nguyên trong Redux
         const redirectTimer = setTimeout(() => {
             navigate('/checkout');
         }, 3000);

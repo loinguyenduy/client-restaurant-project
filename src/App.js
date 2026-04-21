@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MainLayout from "./components/MainLayout.js";
 import HomePage from "./components/home/HomePage.js";
@@ -20,9 +20,11 @@ import Checkout from "./components/order/Checkout.js";
 import PaymentSuccess from "./components/order/PaymentSuccess.js";
 import PaymentCancel from "./components/order/PaymentCancel.js";
 import MyOrders from "./components/order/MyOrders.js";
+import Invoice from "./components/order/Invoice.js";
 
 function App() {
   const dispatch = useDispatch();
+  const [isAppLoading, setIsAppLoading] = useState(true);
 
   useEffect(() => {
     const fetchUserSession = async () => {
@@ -40,11 +42,28 @@ function App() {
         }
       } catch (error) {
         console.log("No active session or token expired");
+      } finally {
+        setIsAppLoading(false);
       }
     };
 
     fetchUserSession();
   }, [dispatch]);
+
+  if (isAppLoading) {
+    return (
+      <div
+        style={{
+          height: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        Loading application...
+      </div>
+    );
+  }
 
   return (
     <>
@@ -101,6 +120,14 @@ function App() {
               element={
                 <PrivateRoute>
                   <MyOrders />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/invoice"
+              element={
+                <PrivateRoute>
+                  <Invoice />
                 </PrivateRoute>
               }
             />
