@@ -5,6 +5,7 @@ const INITIAL_STATE = {
         email: '',
         username: '',
         role: '',
+        phone_number: ''
     },
     isAuthenticated: false,
     token: ''
@@ -21,6 +22,7 @@ const authReducer = (state = INITIAL_STATE, action) => {
                     email: action.payload.email,
                     username: action.payload.username,
                     role: action.payload.role,
+                    phone_number: action.payload.phone_number || ''
                 },
                 isAuthenticated: true,
                 token: action.payload.accessToken

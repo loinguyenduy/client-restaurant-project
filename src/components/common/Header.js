@@ -1,7 +1,6 @@
-// src/components/common/Header.js
 import React from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Menu as MenuIcon, LogOut } from 'lucide-react'; 
+import { ShoppingCart, Menu as MenuIcon, LogOut, ClipboardList } from 'lucide-react'; // Thêm ClipboardList
 import { useSelector, useDispatch } from 'react-redux';
 import { doLogoutSuccess } from '../../redux/actions/authAction';
 import { logoutUserApi } from '../../services/authService';
@@ -13,8 +12,8 @@ const Header = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   
-  const { isAuthenticated, account } = useSelector(state => state.auth); // get auth state from redux to show user info and conditionally render login/logout buttons
-  const cartItems = useSelector(state => state.cart.cartItems); // get cart items from redux to show count on cart icon
+  const { isAuthenticated, account } = useSelector(state => state.auth); 
+  const cartItems = useSelector(state => state.cart.cartItems); 
 
   const handleLogout = async () => {
     try {
@@ -51,6 +50,20 @@ const Header = () => {
         </nav>
 
         <div className="header-actions">
+          <div className="user-tools">
+          
+          {/* Nút My Orders (Chỉ hiện khi đã đăng nhập) nằm ngang hàng và cạnh Cart */}
+          {isAuthenticated && (
+            <Link 
+              to="/my-orders" 
+              className="action-item" 
+              title="My Orders"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', marginRight: '10px', color: 'inherit' }}
+            >
+              <ClipboardList size={22} />
+            </Link>
+          )}
+
           <button 
             className="action-item cart-icon" 
             onClick={() => dispatch(doToggleCart(true))}
@@ -59,6 +72,7 @@ const Header = () => {
             <ShoppingCart size={22} />
             <span className="cart-count">{cartItems.length}</span>
           </button>
+          </div>
           
           {isAuthenticated ? (
             <div className="user-profile">

@@ -75,7 +75,7 @@
   .header-actions {
     display: flex;
     align-items: center;
-    gap: 25px;
+    gap: 15px;
 
     .action-item {
       color: var(--text-light);
@@ -85,6 +85,13 @@
       &:hover {
         color: var(--accent-gold);
       }
+    }
+
+    .user-tools {
+      display: flex;
+      align-items: center;
+      gap: 2px; 
+      margin-right: 15px; 
     }
 
     .cart-count {

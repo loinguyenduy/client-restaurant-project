@@ -16,8 +16,14 @@ import GuestRoute from "./routes/GuestRoute.js";
 import { getCartApi } from "./services/cartService.js";
 import { doSetCartFromServer } from "./redux/actions/cartAction.js";
 
+import Checkout from "./components/order/Checkout.js";
+import PaymentSuccess from "./components/order/PaymentSuccess.js";
+import PaymentCancel from "./components/order/PaymentCancel.js";
+import MyOrders from "./components/order/MyOrders.js";
+
 function App() {
   const dispatch = useDispatch();
+
   useEffect(() => {
     const fetchUserSession = async () => {
       try {
@@ -27,12 +33,11 @@ function App() {
           dispatch(doFetchAccountSuccess(res.DT));
         }
 
-        // fetch cart data if user logged in successfully 
+        // fetch cart data if user logged in successfully
         let cartRes = await getCartApi();
         if (cartRes && cartRes.EC === 0) {
           dispatch(doSetCartFromServer(cartRes.DT));
         }
-
       } catch (error) {
         console.log("No active session or token expired");
       }
@@ -40,6 +45,7 @@ function App() {
 
     fetchUserSession();
   }, [dispatch]);
+
   return (
     <>
       <BrowserRouter>
@@ -64,6 +70,40 @@ function App() {
           <Route path="/" element={<MainLayout />}>
             <Route index element={<HomePage />} />
             <Route path="/menu" element={<Menu />} />
+
+            {/* --- ORDER & PAYMENT ROUTES --- */}
+            <Route
+              path="/checkout"
+              element={
+                <PrivateRoute>
+                  <Checkout />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/payment-success"
+              element={
+                <PrivateRoute>
+                  <PaymentSuccess />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/payment-cancel"
+              element={
+                <PrivateRoute>
+                  <PaymentCancel />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/my-orders"
+              element={
+                <PrivateRoute>
+                  <MyOrders />
+                </PrivateRoute>
+              }
+            />
           </Route>
         </Routes>
       </BrowserRouter>
