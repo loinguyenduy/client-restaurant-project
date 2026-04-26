@@ -16,11 +16,15 @@ import GuestRoute from "./routes/GuestRoute.js";
 import { getCartApi } from "./services/cartService.js";
 import { doSetCartFromServer } from "./redux/actions/cartAction.js";
 
+// Order Components
 import Checkout from "./components/order/Checkout.js";
 import PaymentSuccess from "./components/order/PaymentSuccess.js";
 import PaymentCancel from "./components/order/PaymentCancel.js";
 import MyOrders from "./components/order/MyOrders.js";
 import Invoice from "./components/order/Invoice.js";
+
+// Reservation Component
+import ReservationPage from "./components/reservation/ReservationPage.js";
 
 function App() {
   const dispatch = useDispatch();
@@ -29,16 +33,14 @@ function App() {
   useEffect(() => {
     const fetchUserSession = async () => {
       try {
-        // check token if exist and valid, fetch user info
         let res = await fetchAccountApi();
         if (res && res.EC === 0) {
           dispatch(doFetchAccountSuccess(res.DT));
-        }
-
-        // fetch cart data if user logged in successfully
-        let cartRes = await getCartApi();
-        if (cartRes && cartRes.EC === 0) {
-          dispatch(doSetCartFromServer(cartRes.DT));
+          
+          let cartRes = await getCartApi();
+          if (cartRes && cartRes.EC === 0) {
+            dispatch(doSetCartFromServer(cartRes.DT));
+          }
         }
       } catch (error) {
         console.log("No active session or token expired");
@@ -52,15 +54,8 @@ function App() {
 
   if (isAppLoading) {
     return (
-      <div
-        style={{
-          height: "100vh",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        Loading application...
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#F8FAFC' }}>
+        <h2 style={{ color: '#0F172A', fontFamily: 'serif' }}>Loading Royal Restaurant...</h2>
       </div>
     );
   }
@@ -69,68 +64,26 @@ function App() {
     <>
       <BrowserRouter>
         <Routes>
-          <Route
-            path="/login"
-            element={
-              <GuestRoute>
-                <Login />
-              </GuestRoute>
-            }
-          />
-          <Route
-            path="/register"
-            element={
-              <GuestRoute>
-                <Register />
-              </GuestRoute>
-            }
-          />
+          <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
+          <Route path="/register" element={<GuestRoute><Register /></GuestRoute>} />
 
           <Route path="/" element={<MainLayout />}>
             <Route index element={<HomePage />} />
             <Route path="/menu" element={<Menu />} />
+            
+            {/* Reservation Route */}
+            <Route path="/reservation" element={
+              <PrivateRoute>
+                <ReservationPage />
+              </PrivateRoute>
+            } />
 
-            {/* --- ORDER & PAYMENT ROUTES --- */}
-            <Route
-              path="/checkout"
-              element={
-                <PrivateRoute>
-                  <Checkout />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/payment-success"
-              element={
-                <PrivateRoute>
-                  <PaymentSuccess />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/payment-cancel"
-              element={
-                <PrivateRoute>
-                  <PaymentCancel />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/my-orders"
-              element={
-                <PrivateRoute>
-                  <MyOrders />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/invoice"
-              element={
-                <PrivateRoute>
-                  <Invoice />
-                </PrivateRoute>
-              }
-            />
+            {/* Order & Payment Routes */}
+            <Route path="/checkout" element={<PrivateRoute><Checkout /></PrivateRoute>} />
+            <Route path="/payment-success" element={<PrivateRoute><PaymentSuccess /></PrivateRoute>} />
+            <Route path="/payment-cancel" element={<PrivateRoute><PaymentCancel /></PrivateRoute>} />
+            <Route path="/my-orders" element={<PrivateRoute><MyOrders /></PrivateRoute>} />
+            <Route path="/invoice" element={<PrivateRoute><Invoice /></PrivateRoute>} />
           </Route>
         </Routes>
       </BrowserRouter>
