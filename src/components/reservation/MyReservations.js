@@ -49,8 +49,14 @@ const MyReservations = () => {
         }
     };
 
-    const formatDate = (dateString) => {
-        const options = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
+   const formatDate = (dateString) => {
+        const options = { 
+            weekday: 'short', 
+            month: 'short', 
+            day: 'numeric', 
+            year: 'numeric',
+            timeZone: 'UTC' 
+        };
         return new Date(dateString).toLocaleDateString('en-US', options);
     };
 
@@ -58,10 +64,10 @@ const MyReservations = () => {
         return new Date(dateString).toLocaleTimeString('en-US', {
             hour: '2-digit',
             minute: '2-digit',
-            hour12: false
+            hour12: false,
+            timeZone: 'UTC' 
         });
     };
-
     if (isLoading) {
         return (
             <div className="reservations-loading">
