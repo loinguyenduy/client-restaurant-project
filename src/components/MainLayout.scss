@@ -1,0 +1,10 @@
+.main-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+
+  .content-wrapper {
+    flex: 1; // Đảm bảo Footer luôn nằm ở cuối trang khi nội dung ít
+    margin-top: 70px; // Chừa chỗ cho Header cố định (nếu có)
+  }
+}
