@@ -90,7 +90,7 @@ const ReservationPage = () => {
             const res = await createReservationApi(reservationData);
             if (res && res.EC === 0) {
                 toast.success("Table reserved successfully!");
-                navigate('/my-orders'); // Hoặc bạn có thể làm 1 trang Reservation Success riêng
+                navigate('/my-reservations');
             } else {
                 toast.error(res.EM || "Failed to reserve table. It might be fully booked.");
                 // Load lại danh sách giờ nếu vừa bị người khác đặt mất

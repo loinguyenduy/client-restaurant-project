@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Menu as MenuIcon, LogOut, ClipboardList } from 'lucide-react'; // Thêm ClipboardList
+import { ShoppingCart, Menu as MenuIcon, LogOut, User, ClipboardList, Calendar, ChevronDown } from 'lucide-react'; 
 import { useSelector, useDispatch } from 'react-redux';
 import { doLogoutSuccess } from '../../redux/actions/authAction';
 import { logoutUserApi } from '../../services/authService';
@@ -15,12 +15,28 @@ const Header = () => {
   const { isAuthenticated, account } = useSelector(state => state.auth); 
   const cartItems = useSelector(state => state.cart.cartItems); 
 
+  // State quản lý Dropdown
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Xử lý click ra ngoài để đóng dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const handleLogout = async () => {
     try {
       await logoutUserApi();
       dispatch(doLogoutSuccess());
       dispatch(doClearCart()); 
       toast.info("You have successfully logged out.");
+      setIsDropdownOpen(false);
       navigate('/');
     } catch (error) {
       toast.error("An error occurred while logging out.");
@@ -50,36 +66,55 @@ const Header = () => {
         </nav>
 
         <div className="header-actions">
-          <div className="user-tools">
           
-          {/* Nút My Orders (Chỉ hiện khi đã đăng nhập) nằm ngang hàng và cạnh Cart */}
-          {isAuthenticated && (
-            <Link 
-              to="/my-orders" 
-              className="action-item" 
-              title="My Orders"
-              style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', marginRight: '10px', color: 'inherit' }}
-            >
-              <ClipboardList size={22} />
-            </Link>
-          )}
-
+          {/* Nút Giỏ hàng giữ nguyên bên ngoài */}
           <button 
             className="action-item cart-icon" 
             onClick={() => dispatch(doToggleCart(true))}
-            style={{ background: 'none', border: 'none', cursor: 'pointer' }}
           >
             <ShoppingCart size={22} />
             <span className="cart-count">{cartItems.length}</span>
           </button>
-          </div>
           
           {isAuthenticated ? (
-            <div className="user-profile">
-              <span className="greeting">Welcome, {account.username}</span>
-              <button className="action-item logout-btn" onClick={handleLogout} title="Logout">
-                <LogOut size={20} />
-              </button>
+            <div className="user-dropdown-container" ref={dropdownRef}>
+              <div 
+                className="dropdown-trigger" 
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              >
+                <div className="avatar-placeholder">
+                  {account.username.charAt(0).toUpperCase()}
+                </div>
+                <span className="greeting">{account.username}</span>
+                <ChevronDown size={16} className={`chevron ${isDropdownOpen ? 'open' : ''}`} />
+              </div>
+
+              {isDropdownOpen && (
+                <div className="dropdown-menu">
+                  <div className="dropdown-header">
+                    <p className="user-name">{account.username}</p>
+                    <p className="user-email">{account.email}</p>
+                  </div>
+                  
+                  <div className="dropdown-links">
+                    <Link to="/profile" className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>
+                      <User size={16} /> My Profile
+                    </Link>
+                    <Link to="/my-orders" className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>
+                      <ClipboardList size={16} /> Order History
+                    </Link>
+                    <Link to="/my-reservations" className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>
+                      <Calendar size={16} /> Table Bookings
+                    </Link>
+                  </div>
+
+                  <div className="dropdown-footer">
+                    <button className="dropdown-item logout-btn" onClick={handleLogout}>
+                      <LogOut size={16} /> Logout
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div className="auth-buttons">

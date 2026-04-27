@@ -1,4 +1,3 @@
-// src/components/common/Header.scss
 .header {
   background-color: var(--primary-navy);
   color: var(--text-light);
@@ -42,7 +41,7 @@
 
   .nav-menu {
     display: flex;
-    gap: 35px; // Tăng khoảng cách giữa các menu tiếng Anh
+    gap: 35px;
 
     .nav-link {
       font-size: 0.85rem;
@@ -75,23 +74,25 @@
   .header-actions {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 25px;
 
     .action-item {
       color: var(--text-light);
       transition: color 0.3s ease;
       position: relative;
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
 
       &:hover {
         color: var(--accent-gold);
       }
     }
 
-    .user-tools {
-      display: flex;
-      align-items: center;
-      gap: 2px; 
-      margin-right: 15px; 
+    .cart-icon {
+      margin-right: 10px;
     }
 
     .cart-count {
@@ -107,43 +108,133 @@
       border: 1px solid var(--primary-navy);
     }
 
-    .mobile-menu-btn {
-      display: none;
-      background: none;
-      border: none;
-      color: var(--text-light);
-      cursor: pointer;
-    }
+    /* --- DROPDOWN MENU STYLES --- */
+    .user-dropdown-container {
+      position: relative;
 
-    .user-profile {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-
-      .greeting {
-        font-size: 0.9rem;
-        font-weight: 500;
-        color: var(--accent-gold);
-        letter-spacing: 0.5px;
-      }
-
-      .logout-btn {
-        background: none;
-        border: none;
-        padding: 0;
-        cursor: pointer;
+      .dropdown-trigger {
         display: flex;
         align-items: center;
-        
+        gap: 10px;
+        cursor: pointer;
+        padding: 6px 12px;
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.05);
+        transition: background 0.3s ease;
+
         &:hover {
-          color: #fca5a5; // Đỏ nhạt khi hover vào nút logout
+          background: rgba(255, 255, 255, 0.1);
+        }
+
+        .avatar-placeholder {
+          width: 28px;
+          height: 28px;
+          background-color: var(--accent-gold);
+          color: var(--primary-navy);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          font-size: 14px;
+        }
+
+        .greeting {
+          font-size: 0.9rem;
+          font-weight: 500;
+          color: var(--text-light);
+        }
+
+        .chevron {
+          color: var(--text-light);
+          transition: transform 0.3s ease;
+          &.open {
+            transform: rotate(180deg);
+          }
         }
       }
 
-      
+      .dropdown-menu {
+        position: absolute;
+        top: calc(100% + 12px);
+        right: 0;
+        width: 240px;
+        background-color: var(--bg-white);
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+        animation: slideDown 0.2s ease forwards;
+        transform-origin: top right;
 
-      
+        .dropdown-header {
+          padding: 16px;
+          background-color: #F8FAFC;
+          border-bottom: 1px solid #E2E8F0;
+
+          .user-name {
+            margin: 0 0 4px 0;
+            font-weight: 600;
+            color: var(--primary-navy);
+            font-size: 15px;
+          }
+          .user-email {
+            margin: 0;
+            font-size: 13px;
+            color: #64748B;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+        }
+
+        .dropdown-links {
+          padding: 8px 0;
+          border-bottom: 1px solid #E2E8F0;
+        }
+
+        .dropdown-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 12px 16px;
+          color: var(--text-dark);
+          text-decoration: none;
+          font-size: 14px;
+          font-weight: 500;
+          transition: background 0.2s;
+          width: 100%;
+          text-align: left;
+          background: none;
+          border: none;
+          cursor: pointer;
+
+          svg {
+            color: #64748B;
+          }
+
+          &:hover {
+            background-color: #F1F5F9;
+            color: var(--primary-navy);
+            svg { color: var(--primary-navy); }
+          }
+        }
+
+        .dropdown-footer {
+          padding: 8px 0;
+          
+          .logout-btn {
+            color: #DC2626;
+            svg { color: #DC2626; }
+            &:hover {
+              background-color: #FEF2F2;
+              color: #B91C1C;
+              svg { color: #B91C1C; }
+            }
+          }
+        }
+      }
     }
+
     .auth-buttons {
       display: flex;
       gap: 12px;
@@ -152,12 +243,11 @@
       .btn-login {
         padding: 8px 18px;
         color: var(--text-light);
-        border: 1px solid rgba(255, 255, 255, 0.4); /* Nút Log In chỉ có viền mỏng */
+        border: 1px solid rgba(255, 255, 255, 0.4);
         border-radius: 6px;
         font-size: 14px;
         font-weight: 500;
         transition: all 0.3s ease;
-
         &:hover {
           background-color: rgba(255, 255, 255, 0.1);
           border-color: var(--text-light);
@@ -166,18 +256,30 @@
 
       .btn-register {
         padding: 8px 18px;
-        background-color: rgba(255, 255, 255, 0.15); /* Nút Register có nền trắng mờ */
+        background-color: rgba(255, 255, 255, 0.15);
         color: var(--text-light);
         border: 1px solid transparent;
         border-radius: 6px;
         font-size: 14px;
         font-weight: 500;
         transition: all 0.3s ease;
-
         &:hover {
           background-color: rgba(255, 255, 255, 0.25);
         }
       }
     }
+
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text-light);
+      cursor: pointer;
+    }
   }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }

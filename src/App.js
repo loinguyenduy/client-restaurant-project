@@ -25,6 +25,7 @@ import Invoice from "./components/order/Invoice.js";
 
 // Reservation Component
 import ReservationPage from "./components/reservation/ReservationPage.js";
+import MyReservations from "./components/reservation/MyReservations.js";
 
 function App() {
   const dispatch = useDispatch();
@@ -75,6 +76,11 @@ function App() {
             <Route path="/reservation" element={
               <PrivateRoute>
                 <ReservationPage />
+              </PrivateRoute>
+            } />
+            <Route path="/my-reservations" element={
+              <PrivateRoute>
+                <MyReservations />
               </PrivateRoute>
             } />
 
