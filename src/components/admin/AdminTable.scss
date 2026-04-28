@@ -1,0 +1,79 @@
+.admin-page-container {
+  .page-header {
+    margin-bottom: 24px;
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #0F172A;
+      margin: 0;
+    }
+  }
+
+  .table-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid #E2E8F0;
+    overflow: hidden;
+
+    .table-responsive {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+
+      th {
+        padding: 16px 24px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #64748B;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid #F1F5F9;
+        background-color: #FAFAF9;
+      }
+
+      td {
+        padding: 20px 24px;
+        font-size: 14px;
+        color: #334155;
+        border-bottom: 1px solid #F1F5F9;
+        vertical-align: middle;
+
+        .primary-text { font-weight: 600; color: #0F172A; display: block; margin-bottom: 4px; }
+        .secondary-text { font-size: 13px; color: #64748B; display: block; }
+
+        .status-select {
+          padding: 6px 12px;
+          border-radius: 6px;
+          border: 1px solid #E2E8F0;
+          font-size: 13px;
+          font-weight: 500;
+          cursor: pointer;
+          outline: none;
+          background-color: white;
+
+          &:disabled {
+            background-color: #F1F5F9;
+            cursor: not-allowed;
+            color: #94A3B8;
+          }
+        }
+      }
+
+      tbody tr {
+        transition: background-color 0.2s;
+        &:hover { background-color: #F8FAFC; }
+      }
+    }
+
+    .empty-state {
+      padding: 40px;
+      text-align: center;
+      color: #64748B;
+    }
+  }
+}

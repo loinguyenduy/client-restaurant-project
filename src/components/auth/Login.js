@@ -36,9 +36,7 @@ const Login = () => {
 
                 // synce cart if guest has items in cart before login
                 if (guestCartItems && guestCartItems.length > 0) {
-                    
                     try {
-                        console.log(">>> CHECK RESPONSE LOGIN DT: ", res.DT);
                         const freshToken = res.DT.access_token;
 
                         const payloadCart = guestCartItems.map(item => ({
@@ -55,20 +53,25 @@ const Login = () => {
                             toast.warning("Logged in, but couldn't sync your temporary cart.");
                         }
                     } catch (syncError) {
-                        console.log(">>> Error during sync logic: ", syncError);
                         toast.warning("Logged in, but an error occurred while syncing cart.");
                     }
-
                 } else {
                     toast.success("Welcome back to Royal Restaurant!");
                 }
-                navigate('/');
+
+                // --- LOGIC ĐÃ FIX: CHECK ROLE ĐỂ ĐIỀU HƯỚNG ---
+                const userRole = res.DT.role; 
+                if (userRole === 'admin') {
+                    navigate('/admin/dashboard');
+                } else {
+                    navigate('/'); // Tạm thời role nào khác admin cũng bay về trang chủ
+                }
+                
             } else {
                 toast.error(res.EM);
             }
         } catch (error) {
-            console.log(">>> Error during login logic: ", error);
-            toast.error(error.EM || "Invalid credentials.");
+            toast.error(error?.EM || "Invalid credentials.");
         }
         setIsLoading(false);
     };

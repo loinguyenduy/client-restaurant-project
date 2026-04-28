@@ -1,0 +1,127 @@
+.admin-layout-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #F8FAFC; 
+}
+
+.admin-sidebar {
+  width: 260px;
+  background-color: #0F172A;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 100;
+
+  .sidebar-brand {
+    height: 80px;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    
+    h2 {
+      font-size: 20px;
+      font-weight: 400;
+      letter-spacing: 1px;
+      margin: 0;
+      color: #94A3B8;
+      span {
+        font-weight: 700;
+        color: white;
+      }
+    }
+  }
+
+  .sidebar-nav {
+    flex: 1;
+    padding: 24px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      color: #94A3B8;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+
+      &:hover {
+        color: white;
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+
+      &.active {
+        color: white;
+        background-color: rgba(255, 255, 255, 0.1);
+        font-weight: 600;
+      }
+    }
+  }
+
+  .sidebar-footer {
+    padding: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+
+      .avatar {
+        width: 36px;
+        height: 36px;
+        background-color: #475569;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 14px;
+      }
+
+      .details {
+        display: flex;
+        flex-direction: column;
+        .name { font-size: 14px; font-weight: 600; }
+        .role { font-size: 12px; color: #94A3B8; text-transform: capitalize;}
+      }
+    }
+
+    .btn-logout {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #94A3B8;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+      }
+    }
+  }
+}
+
+.admin-main-content {
+  flex: 1;
+  margin-left: 260px; // Đẩy nội dung sang phải nhường chỗ cho sidebar
+  padding: 32px 40px;
+}

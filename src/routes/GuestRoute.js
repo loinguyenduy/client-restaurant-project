@@ -2,14 +2,21 @@ import React from "react";
 import { Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-//This route used to redirect to homepage when user enter url to login or register (when they logged)
-const GuestRoute = ({ children }) => { // children is wrapper component (ex: </Login> )
-  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+const GuestRoute = ({ children }) => {
+  const { isAuthenticated, account } = useSelector((state) => state.auth);
 
   if (isAuthenticated) {
+    //Tự động đá về đúng trang theo Role
+    if (account?.role === 'admin') {
+      return <Navigate to="/admin/dashboard" replace />;
+    }
+    // if (account?.role === 'staff') {
+    //   return <Navigate to="/admin/orders" replace />;
+    // }
+    
     return <Navigate to="/" replace />;
-    //replace: replace current page (login, register) to home page
   }
+  
   return children;
 };
 

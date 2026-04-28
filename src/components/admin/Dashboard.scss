@@ -1,0 +1,65 @@
+.dashboard-container {
+  .page-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0F172A;
+    margin-top: 0;
+    margin-bottom: 24px;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px;
+  }
+
+  .stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border: 1px solid #E2E8F0;
+
+    .stat-info {
+      .stat-label {
+        font-size: 13px;
+        color: #64748B;
+        font-weight: 500;
+        display: block;
+        margin-bottom: 8px;
+      }
+      .stat-value {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 700;
+        color: #0F172A;
+      }
+    }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &.bg-green { background-color: #DCFCE7; }
+      &.bg-blue { background-color: #DBEAFE; }
+      &.bg-purple { background-color: #F3E8FF; }
+      &.bg-orange { background-color: #FFEDD5; }
+    }
+  }
+}
+
+.loading-state {
+  display: flex;
+  justify-content: center;
+  padding: 50px;
+  color: #64748B;
+  .spin { animation: spin 1s linear infinite; }
+}
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
