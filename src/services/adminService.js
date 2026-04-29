@@ -40,3 +40,16 @@ export const updateProductApi = (id, formData) => {
 };
 
 export const deleteProductApi = (id) => axios.delete(`/delete-product/${id}`);
+
+// --- USER MANAGEMENT API ---
+export const getAllUsersAdminApi = (page = 1, limit = 10, search = '') => {
+    return axios.get(`/users/manage/get-all-users?page=${page}&limit=${limit}&search=${search}`);
+};
+
+export const updateUserRoleApi = (userId, role) => {
+    return axios.put(`/users/manage/update-role/${userId}`, { role });
+};
+
+export const toggleUserStatusApi = (userId) => {
+    return axios.put(`/users/manage/toggle-status/${userId}`);
+};

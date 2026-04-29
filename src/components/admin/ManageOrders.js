@@ -77,15 +77,16 @@ const ManageOrders = () => {
                                 <th>DATE & TIME</th>
                                 <th>CUSTOMER CONTACT</th>
                                 <th>AMOUNT</th>
+                                <th>PAYMENT METHOD</th>
                                 <th>PAYMENT STATUS</th>
                                 <th>ORDER STATUS</th>
                             </tr>
                         </thead>
                         <tbody>
                             {isLoading ? (
-                                <tr><td colSpan="6" className="empty-state">Loading data...</td></tr>
+                                <tr><td colSpan="7" className="empty-state">Loading data...</td></tr>
                             ) : orders.length === 0 ? (
-                                <tr><td colSpan="6" className="empty-state">No orders found.</td></tr>
+                                <tr><td colSpan="7" className="empty-state">No orders found.</td></tr>
                             ) : (
                                 orders.map(order => (
                                     <tr key={order.id}>
@@ -103,6 +104,13 @@ const ManageOrders = () => {
                                         </td>
                                         <td>
                                             <span className="primary-text">${Number(order.final_amount).toFixed(2)}</span>
+                                        </td>
+
+                                        <td>
+                                            {/* Thêm cột Payment Method */}
+                                            <span className="primary-text" style={{ textTransform: 'uppercase' }}>
+                                                {order.payment_method || 'N/A'}
+                                            </span>
                                         </td>
                                         <td>
                                             {/* Dạng text để xem */}

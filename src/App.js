@@ -34,6 +34,7 @@ import DashboardOverview from "./components/admin/DashboardOverview.js";
 import ManageOrders from "./components/admin/ManageOrders.js";
 import ManageReservations from "./components/admin/ManageReservations.js";  
 import ManageMenu from "./components/admin/ManageMenu.js";
+import AccountManagement from "./components/admin/AccountManagement.js";
 
 function App() {
   const dispatch = useDispatch();
@@ -178,6 +179,7 @@ function App() {
             <Route path="orders" element={<ManageOrders />} />
             <Route path="reservations" element={<ManageReservations />} />
             <Route path="menu" element={<ManageMenu />} />
+            <Route path="users" element={<AccountManagement />} />
           </Route>
         </Routes>
       </BrowserRouter>
