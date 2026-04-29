@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, ShoppingBag, CalendarDays, Menu as MenuIcon, Users, LogOut } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, CalendarDays, Menu as MenuIcon, Users, LogOut, MonitorSmartphone, UserCheck, Table, ClipboardList } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { doLogoutSuccess } from '../../redux/actions/authAction';
 import { logoutUserApi } from '../../services/authService';
@@ -23,11 +23,21 @@ const AdminSidebar = () => {
     };
 
     const isAdmin = account.role === 'admin';
+    const isStaff = account.role === 'staff';
 
     return (
         <aside className="admin-sidebar">
-            <div className="sidebar-brand">
-                <h2><span>NAVY</span>ADMIN</h2>
+            <div className="sidebar-brand" style={{ flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center' }}>
+                {isAdmin ? (
+                    <h2><span>NAVY</span>ADMIN</h2>
+                ) : (
+                    <>
+                        <h2><span>NAVY</span>DINE</h2>
+                        <span style={{ fontSize: '11px', fontWeight: '600', color: '#64748B', letterSpacing: '1px', marginTop: '4px', textTransform: 'uppercase' }}>
+                            Staff Portal
+                        </span>
+                    </>
+                )}
             </div>
 
             <nav className="sidebar-nav">
@@ -38,15 +48,32 @@ const AdminSidebar = () => {
                 )}
                 
                 <NavLink to="/admin/orders" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
-                    <ShoppingBag size={18} /> Manage Orders
+                    <ShoppingBag size={18} /> {isStaff ? "Live Orders" : "Manage Orders"}
                 </NavLink>
 
                 <NavLink to="/admin/reservations" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
-                    <CalendarDays size={18} /> Manage Reservations
+                    <CalendarDays size={18} /> Reservations
                 </NavLink>
 
+                <NavLink to="/admin/pos" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+                    <MonitorSmartphone size={18} /> POS Terminal
+                </NavLink>
+
+                {isStaff && (
+                    <NavLink to="/admin/attendance" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+                        <UserCheck size={18} /> Attendance
+                    </NavLink>
+                )}
+
+                {/* --- MENU DÀNH RIÊNG CHO ADMIN --- */}
                 {isAdmin && (
                     <>
+                        <NavLink to="/admin/tables" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+                            <Table size={18} /> Manage Tables
+                        </NavLink>
+                        <NavLink to="/admin/attendance-logs" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+                            <ClipboardList size={18} /> Attendance Logs
+                        </NavLink>
                         <NavLink to="/admin/menu" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
                             <MenuIcon size={18} /> Menu
                         </NavLink>

@@ -35,6 +35,10 @@ import ManageOrders from "./components/admin/ManageOrders.js";
 import ManageReservations from "./components/admin/ManageReservations.js";  
 import ManageMenu from "./components/admin/ManageMenu.js";
 import AccountManagement from "./components/admin/AccountManagement.js";
+import Attendance from "./components/admin/Attendance.js";
+import AttendanceLogs from "./components/admin/AttendanceLogs.js";
+import ManageTables from "./components/admin/ManageTables.js";
+import PosTerminal from "./components/admin/PosTerminal.js";
 
 function App() {
   const dispatch = useDispatch();
@@ -180,6 +184,11 @@ function App() {
             <Route path="reservations" element={<ManageReservations />} />
             <Route path="menu" element={<ManageMenu />} />
             <Route path="users" element={<AccountManagement />} />
+            <Route path="attendance" element={<Attendance />} />
+            <Route path="attendance-logs" element={<AttendanceLogs />} />
+            <Route path="tables" element={<ManageTables />} />
+            <Route path="pos" element={<PosTerminal />} />
+
           </Route>
         </Routes>
       </BrowserRouter>

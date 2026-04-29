@@ -53,3 +53,31 @@ export const updateUserRoleApi = (userId, role) => {
 export const toggleUserStatusApi = (userId) => {
     return axios.put(`/users/manage/toggle-status/${userId}`);
 };
+
+// --- ATTENDANCE API (STAFF) ---
+export const checkAttendanceStatusApi = () => {
+    return axios.get('/attendance/status');
+};
+
+export const checkInApi = () => {
+    return axios.post('/attendance/check-in');
+};
+
+export const checkOutApi = () => {
+    return axios.put('/attendance/check-out');
+};
+
+export const getAttendanceLogsApi = (page = 1, limit = 20, userId = '') => {
+    return axios.get(`/manage/attendance/logs?page=${page}&limit=${limit}&userId=${userId}`);
+};
+
+// --- TABLE MANAGEMENT API ---
+export const getAllTablesApi = () => axios.get('/manage/tables');
+export const createTableApi = (tableData) => axios.post('/manage/tables', tableData);
+export const updateTableStatusApi = (id, status) => axios.put(`/manage/tables/${id}/status`, { status });
+export const deleteTableApi = (id) => axios.delete(`/manage/tables/${id}`);
+
+
+export const createPosOrderApi = (data) => {
+    return axios.post('/manage/orders/pos', data);
+};

@@ -10,9 +10,9 @@ const GuestRoute = ({ children }) => {
     if (account?.role === 'admin') {
       return <Navigate to="/admin/dashboard" replace />;
     }
-    // if (account?.role === 'staff') {
-    //   return <Navigate to="/admin/orders" replace />;
-    // }
+    if (account?.role === 'staff') {
+      return <Navigate to="/admin/attendance" replace />; 
+    }
     
     return <Navigate to="/" replace />;
   }

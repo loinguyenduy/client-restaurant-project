@@ -3,8 +3,6 @@ import {
   Plus,
   Edit2,
   Trash2,
-  CheckCircle,
-  XCircle,
   Image as ImageIcon,
   Loader,
 } from "lucide-react";
@@ -23,16 +21,13 @@ import {
 import "./ManageMenu.scss";
 
 const ManageMenu = () => {
-  // State Categories
   const [categories, setCategories] = useState([]);
   const [newCatName, setNewCatName] = useState("");
   const [isLoadingCat, setIsLoadingCat] = useState(false);
 
-  // State Products
   const [products, setProducts] = useState([]);
   const [isLoadingProd, setIsLoadingProd] = useState(false);
 
-  // Product Form State
   const [productForm, setProductForm] = useState({
     name: "",
     price: "",
@@ -71,7 +66,6 @@ const ManageMenu = () => {
     setIsLoadingProd(false);
   };
 
-  // --- CATEGORY LOGIC ---
   const handleAddCategory = async () => {
     if (!newCatName.trim()) return;
     try {
@@ -124,20 +118,25 @@ const ManageMenu = () => {
     }
   };
 
-  // --- PRODUCT LOGIC ---
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setProductForm((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    setProductForm((prev) => {
+      const newState = { ...prev, [name]: type === "checkbox" ? checked : value };
+      
+      // Auto logic: Tự động tắt is_available nếu stock_quantity <= 0
+      if (name === "stock_quantity") {
+        const stockVal = parseInt(value || 0);
+        if (stockVal <= 0) newState.is_available = false;
+      }
+      return newState;
+    });
   };
 
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       let file = e.target.files[0];
       setImageFile(file);
-      setImagePreview(URL.createObjectURL(file)); // Hiển thị preview ảnh local
+      setImagePreview(URL.createObjectURL(file)); 
     }
   };
 
@@ -151,23 +150,23 @@ const ManageMenu = () => {
     const formData = new FormData();
     formData.append("name", productForm.name);
     formData.append("price", productForm.price);
-    formData.append(
-      "original_price",
-      productForm.original_price || productForm.price,
-    );
-    formData.append("stock_quantity", productForm.stock_quantity || 100);
+    formData.append("original_price", productForm.original_price || productForm.price);
+    
+    // Check lại lần cuối trước khi submit
+    const finalStock = parseInt(productForm.stock_quantity || 0);
+    const finalIsAvailable = finalStock > 0 ? productForm.is_available : false;
+
+    formData.append("stock_quantity", finalStock);
     formData.append("category_id", productForm.category_id);
     formData.append("description", productForm.description);
-    formData.append("is_available", productForm.is_available);
+    formData.append("is_available", finalIsAvailable);
     if (imageFile) formData.append("image", imageFile);
 
     try {
       let res;
       if (editProductId) {
-        // NẾU LÀ UPDATE
         res = await updateProductApi(editProductId, formData);
       } else {
-        // NẾU LÀ CREATE
         res = await createProductApi(formData);
       }
 
@@ -219,7 +218,7 @@ const ManageMenu = () => {
       name: prod.name,
       price: prod.price,
       original_price: prod.original_price,
-      stock_quantity: prod.stock_quantity,
+      stock_quantity: prod.stock_quantity, // Fill stock cũ vào ô input
       category_id: prod.category_id,
       description: prod.description || "",
       is_available: prod.is_available,
@@ -233,7 +232,6 @@ const ManageMenu = () => {
       <h1 className="page-title">Menu Management</h1>
 
       <div className="menu-layout">
-        {/* CỘT TRÁI: CATEGORIES */}
         <div className="categories-column">
           <div className="card-box">
             <h3>Categories</h3>
@@ -276,14 +274,11 @@ const ManageMenu = () => {
           </div>
         </div>
 
-        {/* CỘT PHẢI: PRODUCTS */}
         <div className="products-column">
           <div className="section-header">
             <h3>Dishes</h3>
-            {/* Nút này có thể dùng để toggle mở form add */}
           </div>
 
-          {/* FORM THÊM SẢN PHẨM */}
           <div className="product-form-box">
             <div className="form-row">
               <input
@@ -302,6 +297,13 @@ const ManageMenu = () => {
               />
             </div>
             <div className="form-row">
+              <input
+                type="number"
+                name="stock_quantity"
+                placeholder="Stock Qty (e.g. 50)"
+                value={productForm.stock_quantity}
+                onChange={handleInputChange}
+              />
               <select
                 name="category_id"
                 value={productForm.category_id}
@@ -320,12 +322,12 @@ const ManageMenu = () => {
                   name="is_available"
                   checked={productForm.is_available}
                   onChange={handleInputChange}
+                  disabled={parseInt(productForm.stock_quantity || 0) <= 0}
                 />
-                In Stock (Available)
+                In Stock
               </label>
             </div>
 
-            {/* INPUT FILE ẢNH LOCAL */}
             <div className="image-upload-row">
               <input
                 type="file"
@@ -395,8 +397,9 @@ const ManageMenu = () => {
                         </button>
                       </div>
                     </div>
+                    {/* Hiển thị Stock ở đây */}
                     <p className="category-text">
-                      {prod.Category?.name || "Uncategorized"}
+                      {prod.Category?.name || "Uncategorized"} • Stock: <strong style={{color: prod.stock_quantity <= 5 ? '#DC2626' : 'inherit'}}>{prod.stock_quantity}</strong>
                     </p>
                     <div className="bottom-row">
                       <span className="price">${prod.price}</span>

@@ -63,7 +63,10 @@ const Login = () => {
                 const userRole = res.DT.role; 
                 if (userRole === 'admin') {
                     navigate('/admin/dashboard');
-                } else {
+                }  else if (userRole === 'staff') {
+                    navigate('/admin/attendance');
+                }  
+                else {
                     navigate('/'); // Tạm thời role nào khác admin cũng bay về trang chủ
                 }
                 
