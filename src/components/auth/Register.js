@@ -1,93 +1,130 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { registerUserApi } from '../../services/authService';
-import { toast } from 'react-toastify';
-import './Auth.scss';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { registerUserApi } from "../../services/authService";
+import "./Auth.scss";
 
 const Register = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const [form, setForm] = useState({
+    email: "",
+    username: "",
+    password: "",
+    confirmPassword: "",
+    fullName: "",
+    phone: "",
+    gender: "other",
+  });
+  const [isLoading, setIsLoading] = useState(false);
 
-    const [email, setEmail] = useState("");
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const [fullName, setFullName] = useState("");
-    const [phone, setPhone] = useState("");
-    const [gender, setGender] = useState("other");
-    const [isLoading, setIsLoading] = useState(false);
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setForm((current) => ({ ...current, [name]: value }));
+  };
 
-    const handleRegister = async (e) => {
-        e.preventDefault();
+  const handleRegister = async (event) => {
+    event.preventDefault();
+    const email = form.email.trim();
+    const username = form.username.trim();
+    const fullName = form.fullName.trim();
+    const phone = form.phone.trim();
 
-        if (!email || !username || !password || !fullName) {
-            toast.error("Please fill in all required fields!");
-            return;
-        }
-        if (password.length < 6) {
-            toast.error("Password must be at least 6 characters.");
-            return;
-        }
+    if (!email || !username || !form.password || !fullName) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+    if (form.password.length < 6) {
+      toast.error("Password must be at least 6 characters.");
+      return;
+    }
+    if (form.password !== form.confirmPassword) {
+      toast.error("Password confirmation does not match.");
+      return;
+    }
+    if (phone && !/^\d+$/.test(phone)) {
+      toast.error("Phone number must contain only digits.");
+      return;
+    }
 
-        setIsLoading(true);
-        try {
-            let res = await registerUserApi(email, username, password, fullName, phone, gender);
-            if (res && res.EC === 0) {
-                toast.success("Registration successful! Please sign in.");
-                navigate('/login');
-            } else {
-                toast.error(res.EM);
-            }
-        } catch (error) {
-            toast.error(error.EM || "Server error occurred. Please try again.");
-        }
-        setIsLoading(false);
-    };
+    setIsLoading(true);
+    try {
+      const res = await registerUserApi(
+        email,
+        username,
+        form.password,
+        fullName,
+        phone,
+        form.gender,
+      );
+      if (res?.EC === 0) {
+        toast.success("Registration successful. Please sign in.");
+        navigate("/login");
+      } else {
+        toast.error(res?.EM || "Registration failed.");
+      }
+    } catch (error) {
+      toast.error(error?.EM || "Unable to register. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    return (
-        <div className="auth-page">
-            <div className="auth-box">
-                <h2>Create Account</h2>
-                
-                <form onSubmit={handleRegister}>
-                    <div className="input-group">
-                        <label>Email (*)</label>
-                        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                    </div>
-                    <div className="input-group">
-                        <label>Username (*)</label>
-                        <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
-                    </div>
-                    <div className="input-group">
-                        <label>Password (*)</label>
-                        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-                    </div>
-                    <div className="input-group">
-                        <label>Full Name (*)</label>
-                        <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
-                    </div>
-                    <div className="input-group">
-                        <label>Phone Number</label>
-                        <input type="text" value={phone} onChange={(e) => setPhone(e.target.value)} />
-                    </div>
-                    <div className="input-group">
-                        <label>Gender</label>
-                        <select value={gender} onChange={(e) => setGender(e.target.value)}>
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-                    
-                    <button type="submit" className="btn-submit" disabled={isLoading}>
-                        {isLoading ? "Processing..." : "Sign Up"}
-                    </button>
-                </form>
+  return (
+    <div className="auth-page">
+      <div className="auth-box">
+        <p className="auth-eyebrow">Customer Account</p>
+        <h2>Create Account</h2>
+        <p className="auth-description">Create your Royal Restaurant customer profile.</p>
 
-                <div className="switch-page">
-                    Already have an account? <span onClick={() => navigate('/login')}>Sign In</span>
-                </div>
+        <form onSubmit={handleRegister}>
+          <div className="input-group">
+            <label htmlFor="register-email">Email *</label>
+            <input id="register-email" name="email" type="email" value={form.email} onChange={handleChange} autoComplete="email" required />
+          </div>
+          <div className="input-group">
+            <label htmlFor="register-username">Username *</label>
+            <input id="register-username" name="username" type="text" value={form.username} onChange={handleChange} autoComplete="username" required />
+          </div>
+          <div className="input-group">
+            <label htmlFor="register-full-name">Full Name *</label>
+            <input id="register-full-name" name="fullName" type="text" value={form.fullName} onChange={handleChange} autoComplete="name" required />
+          </div>
+          <div className="form-row">
+            <div className="input-group">
+              <label htmlFor="register-password">Password *</label>
+              <input id="register-password" name="password" type="password" value={form.password} onChange={handleChange} autoComplete="new-password" required />
             </div>
+            <div className="input-group">
+              <label htmlFor="register-confirm-password">Confirm Password *</label>
+              <input id="register-confirm-password" name="confirmPassword" type="password" value={form.confirmPassword} onChange={handleChange} autoComplete="new-password" required />
+            </div>
+          </div>
+          <div className="form-row">
+            <div className="input-group">
+              <label htmlFor="register-phone">Phone Number</label>
+              <input id="register-phone" name="phone" type="tel" inputMode="numeric" value={form.phone} onChange={handleChange} autoComplete="tel" />
+            </div>
+            <div className="input-group">
+              <label htmlFor="register-gender">Gender</label>
+              <select id="register-gender" name="gender" value={form.gender} onChange={handleChange}>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="submit" className="btn-submit" disabled={isLoading}>
+            {isLoading ? "Creating Account..." : "Create Account"}
+          </button>
+        </form>
+
+        <div className="switch-page">
+          Already have an account? <Link to="/login">Sign in</Link>
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default Register;

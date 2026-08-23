@@ -8,6 +8,7 @@ export const getAllOrdersAdminApi = (page, limit, status) => {
 export const updateOrderStatusApi = (orderId, status) => {
     return axios.put(`/manage/orders/${orderId}/status`, { status });
 };
+export const getKitchenOrdersApi = () => axios.get('/manage/orders/kitchen');
 
 export const getAllReservationsAdminApi = (page, limit, status, date) => {
     return axios.get(`/manage/reservations?page=${page}&limit=${limit}&status=${status || 'all'}&date=${date || ''}`);

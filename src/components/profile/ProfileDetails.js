@@ -17,7 +17,7 @@ const ProfileDetails = () => {
     const [formData, setFormData] = useState({
         full_name: account.full_name || '',
         phone_number: account.phone_number || '',
-        gender: account.gender || 'other'
+        gender: account.gender || ''
     });
 
     const handleInputChange = (e) => {
@@ -30,15 +30,32 @@ const ProfileDetails = () => {
         setFormData({
             full_name: account.full_name || '',
             phone_number: account.phone_number || '',
-            gender: account.gender || 'other'
+            gender: account.gender || ''
         });
         setIsEditing(false);
     };
 
     const handleSave = async () => {
+        const fullName = formData.full_name.trim();
+        const phoneNumber = formData.phone_number.trim();
+
+        if (!fullName) {
+            Swal.fire('Invalid name', 'Full name cannot be empty.', 'warning');
+            return;
+        }
+
+        if (phoneNumber && !/^\d+$/.test(phoneNumber)) {
+            Swal.fire('Invalid phone', 'Phone number must contain only digits.', 'warning');
+            return;
+        }
+
         setIsSubmitting(true);
         try {
-            const res = await updateProfileApi(formData);
+            const res = await updateProfileApi({
+                ...formData,
+                full_name: fullName,
+                phone_number: phoneNumber,
+            });
             if (res && res.EC === 0) {
                 // 1. Cập nhật Redux để Header và Sidebar thay đổi theo
                 dispatch(doUpdateUserInfo(res.DT));
@@ -57,7 +74,7 @@ const ProfileDetails = () => {
                 Swal.fire('Error', res.EM || 'Update failed', 'error');
             }
         } catch (error) {
-            Swal.fire('Error', 'An error occurred during update', 'error');
+            Swal.fire('Error', error?.EM || 'An error occurred during update', 'error');
         }
         setIsSubmitting(false);
     };
@@ -138,12 +155,13 @@ const ProfileDetails = () => {
                         <label>Gender</label>
                         {isEditing ? (
                             <select name="gender" value={formData.gender} onChange={handleInputChange}>
+                                <option value="">Prefer not to say</option>
                                 <option value="male">Male</option>
                                 <option value="female">Female</option>
                                 <option value="other">Other</option>
                             </select>
                         ) : (
-                            <p style={{textTransform: 'capitalize'}}>{account.gender}</p>
+                            <p style={{textTransform: 'capitalize'}}>{account.gender || "Not provided"}</p>
                         )}
                     </div>
                 </div>

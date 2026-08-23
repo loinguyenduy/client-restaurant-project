@@ -7,6 +7,7 @@ import {
 
 const INITIAL_STATE = {
   account: {
+    id: "",
     email: "",
     username: "",
     role: "",
@@ -24,6 +25,7 @@ const authReducer = (state = INITIAL_STATE, action) => {
       return {
         ...state,
         account: {
+          id: action.payload.id,
           email: action.payload.email,
           username: action.payload.username,
           role: action.payload.role,
@@ -44,10 +46,15 @@ const authReducer = (state = INITIAL_STATE, action) => {
         ...state,
         account: {
           ...state.account,
-          full_name: action.payload.full_name || state.account.full_name,
-          phone_number:
-            action.payload.phone_number || state.account.phone_number,
-          gender: action.payload.gender || state.account.gender,
+          full_name: Object.prototype.hasOwnProperty.call(action.payload, "full_name")
+            ? action.payload.full_name
+            : state.account.full_name,
+          phone_number: Object.prototype.hasOwnProperty.call(action.payload, "phone_number")
+            ? action.payload.phone_number || ""
+            : state.account.phone_number,
+          gender: Object.prototype.hasOwnProperty.call(action.payload, "gender")
+            ? action.payload.gender
+            : state.account.gender,
         },
       };
     default:

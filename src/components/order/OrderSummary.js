@@ -1,56 +1,37 @@
-import React from 'react';
-import { ShieldCheck } from 'lucide-react';
+import React from "react";
+import { Clock3, Loader, ShieldCheck } from "lucide-react";
+import formatCurrency from "../../utils/formatCurrency";
 
-const OrderSummary = ({ cartItems, subtotal, taxAmount, shippingFee, total }) => {
-    return (
-        <div className="order-summary-section">
-            <h3>Order Summary</h3>
-            
-            <div className="summary-items">
-                {cartItems && cartItems.length > 0 ? (
-                    cartItems.map((item, index) => (
-                        <div className="summary-item" key={`summary-${index}`}>
-                            <div className="item-info">
-                                <h4>{item.Product?.name}</h4>
-                                <p>Quantity: {item.quantity}</p>
-                            </div>
-                            <div className="item-price">
-                                {/* Format tiền tệ cơ bản */}
-                                ${(parseFloat(item.Product?.price) * item.quantity).toFixed(2)}
-                            </div>
-                        </div>
-                    ))
-                ) : (
-                    <p>Your cart is empty.</p>
-                )}
-            </div>
-
-            <div className="summary-calculations">
-                <div className="calc-row">
-                    <span>Subtotal</span>
-                    <span>${subtotal.toFixed(2)}</span>
-                </div>
-                <div className="calc-row">
-                    <span>Shipping</span>
-                    <span>${shippingFee.toFixed(2)}</span>
-                </div>
-                <div className="calc-row">
-                    <span>Tax (8%)</span>
-                    <span>${taxAmount.toFixed(2)}</span>
-                </div>
-            </div>
-
-            <div className="summary-total">
-                <span>Total</span>
-                <span className="total-amount">${total.toFixed(2)}</span>
-            </div>
-
-            <div className="secure-badge">
-                <ShieldCheck size={16} />
-                <span>Secure Checkout Process</span>
-            </div>
+const OrderSummary = ({
+  cartItems,
+  subtotal,
+  taxAmount,
+  total,
+  estimatedPrepMinutes,
+  isSubmitting,
+  isBlocked,
+}) => (
+  <aside className="order-summary-section" aria-labelledby="summary-heading">
+    <h2 id="summary-heading">Order Summary</h2>
+    <div className="summary-items">
+      {cartItems.map((item) => (
+        <div className="summary-item" key={item.product_id}>
+          <div className="item-info"><h3>{item.Product?.name}</h3><p>{item.quantity} × {formatCurrency(item.Product?.price)}</p></div>
+          <strong>{formatCurrency(Number(item.Product?.price) * item.quantity)}</strong>
         </div>
-    );
-};
+      ))}
+    </div>
+    <div className="summary-calculations">
+      <div className="calc-row"><span>Subtotal</span><span>{formatCurrency(subtotal)}</span></div>
+      <div className="calc-row"><span>Tax (8%)</span><span>{formatCurrency(taxAmount)}</span></div>
+    </div>
+    <div className="summary-total"><span>Total</span><strong>{formatCurrency(total)}</strong></div>
+    <div className="prep-estimate"><Clock3 size={18} /><span><small>Estimated preparation</small><strong>About {estimatedPrepMinutes} minutes</strong></span></div>
+    <button type="submit" className="confirm-btn" disabled={isSubmitting || isBlocked}>
+      {isSubmitting ? <><Loader size={17} className="spin" /> Placing order...</> : "Place takeaway order"}
+    </button>
+    <div className="secure-badge"><ShieldCheck size={16} /><span>Secure checkout powered by the restaurant</span></div>
+  </aside>
+);
 
 export default OrderSummary;

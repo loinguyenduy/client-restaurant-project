@@ -1,166 +1,152 @@
-import React, { useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
-import { getUserOrdersApi, rePayOrderApi } from '../../services/orderService';
-import './MyOrders.scss';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from "react";
+import { Clock3, Eye, ReceiptText, RefreshCw, ShoppingBag } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
+import { toast } from "react-toastify";
+import ProductImage from "../menu/ProductImage";
+import { cancelOrderApi, getUserOrdersApi, rePayOrderApi } from "../../services/orderService";
+import formatCurrency from "../../utils/formatCurrency";
+import { formatDateTime, formatStatus, getFulfillmentLabel, isActiveOrder } from "../../utils/orderDisplay";
+import "./MyOrders.scss";
+import { getSocket } from "../../services/socketService";
+
+const OrderCard = ({ order, busyOrderId, onCancel, onPay, onDetails, onInvoice }) => {
+  const canPay = order.payment_method === "payos" && order.payment_status === "pending" && ["pending", "pending_payment"].includes(order.order_status);
+  const canCancel = canPay;
+  const firstItems = (order.OrderItems || []).slice(0, 3);
+  return (
+    <article className={`order-card ${isActiveOrder(order) ? "active-order" : ""}`}>
+      <header className="card-header">
+        <div><span className="order-kind">{getFulfillmentLabel(order)}</span><h3>Order #{order.id.slice(0, 8).toUpperCase()}</h3><time>{formatDateTime(order.createdAt)}</time></div>
+        <span className={`status-badge ${order.order_status}`}>{formatStatus(order.order_status)}</span>
+      </header>
+      {order.requires_manual_refund && <div className="refund-warning">Payment arrived after cancellation. Contact the restaurant for a manual PayOS refund.</div>}
+      <div className="card-body">
+        <div className="items-list">
+          {firstItems.map((item) => (
+            <div className="order-item" key={item.id}>
+              <ProductImage src={item.Product?.image_url} alt={item.Product?.name || "Dish"} />
+              <div><strong>{item.Product?.name || "Legacy dish"}</strong><span>{item.quantity} × {formatCurrency(item.price)}</span></div>
+            </div>
+          ))}
+          {(order.OrderItems?.length || 0) > 3 && <span className="more-items">+{order.OrderItems.length - 3} more items</span>}
+        </div>
+        <div className="order-facts">
+          <div><span>Payment</span><strong>{formatStatus(order.payment_method)} · <em className={`payment-${order.payment_status}`}>{formatStatus(order.payment_status)}</em></strong></div>
+          {order.estimated_ready_at && isActiveOrder(order) && <div className="eta"><span>Estimated ready</span><strong><Clock3 size={16} /> {formatDateTime(order.estimated_ready_at)}</strong></div>}
+          <div><span>Total</span><strong className="order-total">{formatCurrency(order.final_amount)}</strong></div>
+        </div>
+      </div>
+      <footer className="card-actions">
+        {canPay && <button type="button" className="primary-action" disabled={busyOrderId === order.id} onClick={() => onPay(order.id)}>{busyOrderId === order.id ? "Opening PayOS..." : "Pay now"}</button>}
+        {canCancel && <button type="button" className="danger-action" disabled={busyOrderId === order.id} onClick={() => onCancel(order.id)}>Cancel order</button>}
+        <button type="button" onClick={() => onDetails(order.id)}><Eye size={16} /> Track order</button>
+        <button type="button" onClick={() => onInvoice(order)}><ReceiptText size={16} /> Invoice</button>
+      </footer>
+    </article>
+  );
+};
 
 const MyOrders = () => {
-    const navigate = useNavigate();
-    const [orders, setOrders] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isRepaying, setIsRepaying] = useState(null); // save orderId to disable button while processing
+  const navigate = useNavigate();
+  const [orders, setOrders] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [busyOrderId, setBusyOrderId] = useState(null);
+  const hasConnectedRef = useRef(false);
 
-    useEffect(() => {
-        fetchOrders();
-    }, []);
-
-    const fetchOrders = async () => {
-        setIsLoading(true);
-        try {
-            const res = await getUserOrdersApi();
-            if (res && res.EC === 0) {
-                setOrders(res.DT);
-            } else {
-                toast.error(res.EM || "Failed to fetch orders");
-            }
-        } catch (error) {
-            console.error(">>> Error fetching orders:", error);
-            toast.error("An error occurred while loading your orders.");
-        }
-        setIsLoading(false);
-    };
-
-    // format date helper function
-    const formatDate = (dateString) => {
-        const options = { year: 'numeric', month: 'short', day: 'numeric' };
-        return new Date(dateString).toLocaleDateString('en-US', options);
-    };
-
-    // handle re-pay for pending orders
-    const handleRePay = async (orderId) => {
-        setIsRepaying(orderId);
-        try {
-            const res = await rePayOrderApi(orderId);
-            if (res && res.EC === 0 && res.DT) {
-                window.location.href = res.DT; // redirect to new payment link
-            } else {
-                toast.error(res.EM || "Cannot create payment link.");
-            }
-        } catch (error) {
-            console.error(">>> Error during re-pay:", error);
-            toast.error("Server error. Please try again later.");
-        }
-        setIsRepaying(null);
-    };
-
-    if (isLoading) {
-        return <div className="my-orders-container"><div className="loading-state">Loading your orders...</div></div>;
+  const fetchOrders = async () => {
+    setIsLoading(true);
+    setErrorMessage("");
+    try {
+      const response = await getUserOrdersApi();
+      if (response?.EC !== 0) throw new Error(response?.EM);
+      setOrders(response.DT || []);
+    } catch (error) {
+      setErrorMessage(error?.EM || error?.message || "Your orders could not be loaded.");
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    return (
-        <div className="my-orders-container">
-            <div className="orders-header">
-                <h1>Your Orders</h1>
-                <p>Review your past and current physical and online orders.</p>
-            </div>
+  useEffect(() => { fetchOrders(); }, []);
 
-            {orders.length === 0 ? (
-                <div className="empty-state">
-                    <h3>No orders found</h3>
-                    <p>You haven't placed any orders yet.</p>
-                </div>
-            ) : (
-                <div className="order-list">
-                    {orders.map((order) => (
-                        <div className="order-card" key={order.id}>
-                            
-                            {/* --- HEADER --- */}
-                            <div className="card-header">
-                                <div className="header-info">
-                                    <div className="info-group">
-                                        <span className="label">Order Placed</span>
-                                        <span className="value">{formatDate(order.createdAt)}</span>
-                                    </div>
-                                    <div className="info-group">
-                                        <span className="label">Total</span>
-                                        <span className="value">${parseFloat(order.final_amount).toFixed(2)}</span>
-                                    </div>
-                                    <div className="info-group">
-                                        <span className="label">Order #</span>
-                                        <span className="value">{order.id.substring(0, 8).toUpperCase()}</span>
-                                    </div>
-                                </div>
-                                <div className={`status-badge ${order.order_status}`}>
-                                    {order.order_status.charAt(0).toUpperCase() + order.order_status.slice(1)}
-                                </div>
-                            </div>
+  useEffect(() => {
+    const socket = getSocket();
+    const refreshOrder = (event) => {
+      if (event?.newStatus === "ready") toast.success("Your order is ready for pickup.");
+      fetchOrders();
+    };
+    const refreshPayment = (event) => {
+      if (event?.paymentStatus === "paid") toast.success("Payment confirmed.");
+      fetchOrders();
+    };
+    const refreshOnReconnect = () => {
+      if (hasConnectedRef.current) fetchOrders();
+      hasConnectedRef.current = true;
+    };
+    socket.on("order:status_changed", refreshOrder);
+    socket.on("payment:status_changed", refreshPayment);
+    socket.on("connect", refreshOnReconnect);
+    return () => {
+      socket.off("order:status_changed", refreshOrder);
+      socket.off("payment:status_changed", refreshPayment);
+      socket.off("connect", refreshOnReconnect);
+    };
+  }, []);
 
-                            {/* --- BODY --- */}
-                            <div className="card-body">
-                                
-                                <div className="items-list">
-                                    {order.OrderItems && order.OrderItems.map((item) => (
-                                        <div className="order-item" key={item.id}>
-                                            <img src={item.Product?.image_url} alt={item.Product?.name} />
-                                            <div className="item-details">
-                                                <h4>{item.Product?.name}</h4>
-                                                <div className="qty">Quantity: {item.quantity}</div>
-                                                <div className="price">${parseFloat(item.price).toFixed(2)}</div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
+  const handlePay = async (orderId) => {
+    setBusyOrderId(orderId);
+    try {
+      const response = await rePayOrderApi(orderId);
+      if (response?.EC !== 0 || !response.DT?.checkoutUrl) throw new Error(response?.EM || "Payment link is unavailable.");
+      window.location.assign(response.DT.checkoutUrl);
+    } catch (error) {
+      toast.error(error?.EM || error?.message || "Payment could not be opened.");
+      setBusyOrderId(null);
+    }
+  };
 
-                                <div className="order-summary-box">
-                                    <h4>Order Details</h4>
-                                    
-                                    <div className="summary-row total-row">
-                                        <span>Final Amount</span>
-                                        <span>${parseFloat(order.final_amount).toFixed(2)}</span>
-                                    </div>
+  const handleCancel = async (orderId) => {
+    const confirmation = await Swal.fire({
+      title: "Cancel this unpaid order?",
+      text: "Reserved stock will be returned. This cannot be undone.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Cancel order",
+      confirmButtonColor: "#b91c1c",
+    });
+    if (!confirmation.isConfirmed) return;
+    setBusyOrderId(orderId);
+    try {
+      const response = await cancelOrderApi(orderId);
+      if (response?.EC !== 0) throw new Error(response?.EM);
+      toast.success("Order cancelled.");
+      await fetchOrders();
+    } catch (error) {
+      toast.error(error?.EM || error?.message || "Order could not be cancelled.");
+    } finally {
+      setBusyOrderId(null);
+    }
+  };
 
-                                    <div className="payment-info">
-                                        <div className="info-row">
-                                            <span className="label">Payment Method</span>
-                                            <span className="value">
-                                                {order.payment_method === 'card' || order.payment_method === 'payos' ? 'PayOS' : 'Cash'} 
-                                                <span style={{ color: order.payment_status === 'paid' ? '#16A34A' : '#64748B', marginLeft: '8px' }}>
-                                                    ({order.payment_status})
-                                                </span>
-                                            </span>
-                                        </div>
-                                        <div className="info-row">
-                                            <span className="label">Delivery Address</span>
-                                            <span className="value" style={{ textTransform: 'none' }}>{order.address}</span>
-                                        </div>
-                                    </div>
+  const activeOrders = orders.filter(isActiveOrder);
+  const pastOrders = orders.filter((order) => !isActiveOrder(order));
+  const renderSection = (title, sectionOrders) => sectionOrders.length > 0 && (
+    <section className="orders-section"><h2>{title}</h2><div className="order-list">{sectionOrders.map((order) => (
+      <OrderCard key={order.id} order={order} busyOrderId={busyOrderId} onPay={handlePay} onCancel={handleCancel} onDetails={(id) => navigate(`/my-orders/${id}`)} onInvoice={(selected) => navigate("/invoice", { state: { order: selected } })} />
+    ))}</div></section>
+  );
 
-                                    <div className="action-buttons">
-                                        {order.payment_status === 'pending' && (order.payment_method === 'card' || order.payment_method === 'payos') && (
-                                            <button 
-                                                className="btn-repay" 
-                                                onClick={() => handleRePay(order.id)}
-                                                disabled={isRepaying === order.id}
-                                            >
-                                                {isRepaying === order.id ? 'Processing...' : 'Pay Now'}
-                                            </button>
-                                        )}
-                                        <button 
-                                            className="btn-invoice" 
-                                            onClick={() => navigate('/invoice', { state: { order: order } })}
-                                        >
-                                            View Invoice
-                                        </button>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
-        </div>
-    );
+  return (
+    <main className="my-orders-container">
+      <header className="orders-header"><span>Pickup tracking</span><h1>My Orders</h1><p>Follow preparation progress and review your restaurant orders.</p></header>
+      {isLoading ? <div className="orders-state">Loading your orders...</div>
+        : errorMessage ? <div className="orders-state error" role="alert"><p>{errorMessage}</p><button type="button" onClick={fetchOrders}><RefreshCw size={16} /> Retry</button></div>
+        : orders.length === 0 ? <div className="orders-state"><ShoppingBag size={40} /><h2>No orders yet</h2><p>Your takeaway orders will appear here.</p><button type="button" onClick={() => navigate("/menu")}>Explore the menu</button></div>
+        : <>{renderSection("Active orders", activeOrders)}{renderSection("Past orders", pastOrders)}</>}
+    </main>
+  );
 };
 
 export default MyOrders;

@@ -27,11 +27,12 @@ const SecuritySettings = () => {
     const forceLogout = async () => {
         try {
             await logoutUserApi();
+        } catch (error) {
+            console.error("Logout request error", error);
+        } finally {
             dispatch(doLogoutSuccess());
             dispatch(doClearCart());
             navigate('/login');
-        } catch (error) {
-            console.error("Logout error", error);
         }
     };
 
@@ -82,7 +83,7 @@ const SecuritySettings = () => {
                 Swal.fire('Error', res.EM || 'Failed to change password', 'error');
             }
         } catch (error) {
-            Swal.fire('Error', 'Server error while changing password.', 'error');
+            Swal.fire('Error', error?.EM || 'Server error while changing password.', 'error');
         }
         setIsSubmitting(false);
     };

@@ -3,6 +3,8 @@ import { useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { ArrowLeft, MapPin, Phone, Mail } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import './Invoice.scss';
+import formatCurrency from '../../utils/formatCurrency';
+import { formatStatus, getFulfillmentLabel } from '../../utils/orderDisplay';
 
 const Invoice = () => {
     const location = useLocation(); 
@@ -57,8 +59,8 @@ const Invoice = () => {
                 <div className="invoice-details-row">
                     <div className="details-col">
                         <h5>Bill To:</h5>
-                        <div className="info-text bold">{account.username || "Guest Customer"}</div>
-                        <div className="info-text">{order.address}</div>
+                        <div className="info-text bold">{order.contact_name || account.username || "Guest Customer"}</div>
+                        {order.address && <div className="info-text">{order.address}</div>}
                         <div className="info-text">{order.phone_receiver}</div>
                         {order.note && <div className="info-text note">Note: {order.note}</div>}
                     </div>
@@ -66,15 +68,15 @@ const Invoice = () => {
                         <h5>Order Details:</h5>
                         <div className="detail-line">
                             <span className="label">Method:</span>
-                            <span className="val">{order.payment_method}</span>
+                            <span className="val">{formatStatus(order.payment_method)}</span>
                         </div>
                         <div className="detail-line">
                             <span className="label">Type:</span>
-                            <span className="val">{order.type}</span>
+                            <span className="val">{getFulfillmentLabel(order)}</span>
                         </div>
                         <div className="detail-line">
                             <span className="label">Status:</span>
-                            <span className="val">{order.payment_status}</span>
+                            <span className="val">{formatStatus(order.payment_status)}</span>
                         </div>
                     </div>
                 </div>
@@ -93,8 +95,8 @@ const Invoice = () => {
                             <tr key={item.id}>
                                 <td className="item-name">{item.Product?.name}</td>
                                 <td className="text-center">{item.quantity}</td>
-                                <td className="text-right">${parseFloat(item.price).toFixed(2)}</td>
-                                <td className="text-right">${(parseFloat(item.price) * item.quantity).toFixed(2)}</td>
+                                <td className="text-right">{formatCurrency(item.price)}</td>
+                                <td className="text-right">{formatCurrency(Number(item.price) * item.quantity)}</td>
                             </tr>
                         ))}
                     </tbody>
@@ -104,19 +106,13 @@ const Invoice = () => {
                     <div className="summary-box">
                         <div className="summary-line">
                             <span>Subtotal</span>
-                            <span className="val">${parseFloat(order.total_amount).toFixed(2)}</span>
+                            <span className="val">{formatCurrency(order.total_amount)}</span>
                         </div>
-                        <div className="summary-line">
-                            <span>Shipping Fee</span>
-                            <span className="val">$5.00</span>
-                        </div>
-                        <div className="summary-line">
-                            <span>Tax (8%)</span>
-                            <span className="val">${(parseFloat(order.total_amount) * 0.08).toFixed(2)}</span>
-                        </div>
+                        {Number(order.shipping_fee) > 0 && <div className="summary-line"><span>Legacy shipping</span><span className="val">{formatCurrency(order.shipping_fee)}</span></div>}
+                        {Number(order.tax_price) > 0 && <div className="summary-line"><span>Tax</span><span className="val">{formatCurrency(order.tax_price)}</span></div>}
                         <div className="total-line">
                             <span>Total Amount</span>
-                            <span>${parseFloat(order.final_amount).toFixed(2)}</span>
+                            <span>{formatCurrency(order.final_amount)}</span>
                         </div>
                     </div>
                 </div>

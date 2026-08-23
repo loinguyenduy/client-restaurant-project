@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, Trash2, Loader } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { useSelector } from 'react-redux';
 import Swal from 'sweetalert2';
 import { getAllTablesApi, createTableApi, updateTableStatusApi, deleteTableApi } from '../../services/adminService';
 import './AdminTable.scss';
 
 const ManageTables = () => {
+    const isAdmin = useSelector(state => state.auth.account.role === 'admin');
     const [tables, setTables] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -90,12 +92,12 @@ const ManageTables = () => {
         <div className="admin-page-container">
             <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h1>Manage Tables</h1>
-                <button 
+                {isAdmin && <button
                     onClick={handleAddTable}
                     style={{ background: '#0F172A', color: 'white', border: 'none', padding: '10px 16px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
                 >
                     <Plus size={18} /> Add Table
-                </button>
+                </button>}
             </div>
 
             <div className="table-card">
@@ -131,12 +133,12 @@ const ManageTables = () => {
                                             </select>
                                         </td>
                                         <td className="text-right">
-                                            <button 
+                                            {isAdmin && <button
                                                 onClick={() => handleDeleteTable(table.id, table.table_number)}
                                                 style={{ background: 'none', border: 'none', color: '#DC2626', cursor: 'pointer' }}
                                             >
                                                 <Trash2 size={18} />
-                                            </button>
+                                            </button>}
                                         </td>
                                     </tr>
                                 ))

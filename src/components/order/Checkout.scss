@@ -1,253 +1,158 @@
 .checkout-container {
-  max-width: 1200px;
+  max-width: 1180px;
   margin: 0 auto;
-  padding: 40px 20px;
+  padding: 36px 20px 64px;
 
   .back-link {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    color: var(--secondary-navy);
+    padding: 0;
     margin-bottom: 24px;
-    font-weight: 500;
+    border: 0;
+    background: transparent;
+    color: var(--secondary-navy);
+    font: inherit;
+    font-weight: 600;
     cursor: pointer;
-    &:hover {
-      text-decoration: underline;
-    }
   }
 
-  h1 {
-    font-size: 32px;
-    color: var(--primary-navy);
-    margin-bottom: 32px;
-    font-family: serif; 
-  }
-
-  .checkout-content {
+  .checkout-heading {
     display: flex;
-    gap: 40px;
-    align-items: flex-start;
+    justify-content: space-between;
+    align-items: end;
+    gap: 24px;
+    margin-bottom: 30px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid #e2e8f0;
 
-    @media (max-width: 992px) {
-      flex-direction: column;
-    }
+    span { color: #a7791d; font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+    h1 { margin: 4px 0 0; color: var(--primary-navy); font: 700 34px/1.1 Georgia, serif; }
+    p { max-width: 420px; margin: 0; color: #64748b; text-align: right; }
   }
+
+  .checkout-state {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding: 14px 16px;
+    border: 1px solid #dbe4ef;
+    border-radius: 8px;
+    background: #f8fafc;
+    color: #334155;
+
+    &.error { border-color: #fecaca; background: #fff7f7; color: #991b1b; }
+    button { display: inline-flex; align-items: center; gap: 6px; border: 0; background: none; color: inherit; font-weight: 700; cursor: pointer; }
+  }
+
+  .checkout-content { display: grid; grid-template-columns: minmax(0, 1fr) 390px; gap: 34px; align-items: start; }
 
   .checkout-form-section {
-    flex: 1;
-    background: var(--bg-white);
+    padding: 30px;
+    border: 1px solid #e2e8f0;
     border-radius: 12px;
-    padding: 32px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .05);
 
-    h3 {
-      font-size: 20px;
-      color: var(--primary-navy);
-      margin-bottom: 20px;
-      margin-top: 0;
-      
-      &:not(:first-child) {
-        margin-top: 32px;
-      }
-    }
-
-    .form-group {
-      margin-bottom: 20px;
-
-      label {
-        display: block;
-        font-size: 14px;
-        color: var(--text-dark);
-        margin-bottom: 8px;
-        font-weight: 500;
-      }
-
-      input, textarea {
-        width: 100%;
-        padding: 12px 16px;
-        border: 1px solid #E2E8F0;
-        border-radius: 8px;
-        font-family: inherit;
-        font-size: 15px;
-        transition: border-color 0.2s;
-
-        &:focus {
-          outline: none;
-          border-color: var(--secondary-navy);
-        }
-      }
-
-      textarea {
-        resize: vertical;
-        min-height: 100px;
-      }
-    }
-
-    .payment-methods {
-      display: flex;
-      gap: 16px;
-
-      @media (max-width: 576px) {
-        flex-direction: column;
-      }
-
-      .method-card {
-        flex: 1;
-        border: 1px solid #E2E8F0;
-        border-radius: 8px;
-        padding: 20px 12px;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.2s;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 8px;
-
-        &.active {
-          border-color: var(--primary-navy);
-          background-color: #F8FAFC;
-          box-shadow: 0 0 0 1px var(--primary-navy);
-        }
-
-        svg {
-          width: 24px;
-          height: 24px;
-          color: var(--primary-navy);
-        }
-
-        span {
-          font-size: 14px;
-          font-weight: 500;
-          color: var(--text-dark);
-        }
-      }
-    }
-
-    .confirm-btn {
+    .section-heading { display: flex; gap: 12px; align-items: center; margin-bottom: 26px; color: var(--primary-navy); }
+    .section-heading h2 { margin: 0 0 3px; font: 700 21px Georgia, serif; }
+    .section-heading p { margin: 0; color: #64748b; font-size: 14px; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label, legend { display: block; margin-bottom: 8px; color: #1e293b; font-size: 14px; font-weight: 700; }
+    .form-group label span { color: #64748b; font-weight: 400; }
+    input[type="text"], input[type="tel"], textarea {
       width: 100%;
-      background: var(--primary-navy);
-      color: var(--bg-white);
-      border: none;
-      border-radius: 8px;
-      padding: 16px;
-      font-size: 16px;
-      font-weight: 600;
-      margin-top: 32px;
-      cursor: pointer;
-      transition: background 0.2s;
-
-      &:hover {
-        background: var(--secondary-navy);
-      }
-      
-      &:disabled {
-        background: #94A3B8;
-        cursor: not-allowed;
-      }
+      padding: 12px 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 7px;
+      background: #fff;
+      color: #0f172a;
+      font: inherit;
+      box-sizing: border-box;
     }
+    input:focus, textarea:focus { outline: 3px solid rgba(167, 121, 29, .14); border-color: #a7791d; }
+    textarea { min-height: 110px; resize: vertical; }
+    .form-group small { display: block; margin-top: 5px; color: #94a3b8; text-align: right; }
+    .payment-fieldset { margin: 28px 0 0; padding: 0; border: 0; }
+    .payment-methods { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .method-card {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 76px;
+      padding: 15px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .method-card.active { border-color: #a7791d; box-shadow: 0 0 0 2px rgba(167, 121, 29, .15); background: #fffdf7; }
+    .method-card input { position: absolute; opacity: 0; }
+    .method-card svg { flex: 0 0 auto; color: var(--primary-navy); }
+    .method-card span { display: flex; flex-direction: column; gap: 3px; color: #1e293b; }
+    .method-card small { color: #64748b; }
   }
 
-  /* --- RIGHT COLUMN: ORDER SUMMARY --- */
   .order-summary-section {
-    width: 380px;
-    background: var(--primary-navy);
-    color: var(--text-light);
-    border-radius: 12px;
-    padding: 32px;
     position: sticky;
     top: 24px;
+    padding: 28px;
+    border-radius: 12px;
+    background: var(--primary-navy);
+    color: #f8fafc;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, .18);
 
-    @media (max-width: 992px) {
-      width: 100%;
-      position: static;
-    }
-
-    h3 {
-      color: var(--accent-gold);
-      font-size: 20px;
-      margin-top: 0;
-      margin-bottom: 24px;
-      font-family: serif;
-    }
-
-    .summary-items {
-      margin-bottom: 24px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      padding-bottom: 16px;
-
-      .summary-item {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 16px;
-
-        .item-info {
-          h4 {
-            margin: 0 0 4px 0;
-            font-size: 15px;
-            font-weight: 500;
-          }
-          p {
-            margin: 0;
-            font-size: 13px;
-            color: #94A3B8;
-          }
-        }
-
-        .item-price {
-          font-weight: 500;
-        }
-      }
-    }
-
-    .summary-calculations {
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      padding-bottom: 16px;
-      margin-bottom: 16px;
-
-      .calc-row {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 12px;
-        font-size: 14px;
-        color: #CBD5E1;
-
-        &:last-child {
-          margin-bottom: 0;
-        }
-      }
-    }
-
-    .summary-total {
+    > h2 { margin: 0 0 22px; color: var(--accent-gold); font: 700 21px Georgia, serif; }
+    .summary-items { max-height: 280px; overflow-y: auto; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,.14); }
+    .summary-item { display: flex; justify-content: space-between; gap: 18px; margin-bottom: 15px; }
+    .summary-item h3 { margin: 0 0 4px; font-size: 15px; }
+    .summary-item p { margin: 0; color: #aebbd0; font-size: 13px; }
+    .summary-item > strong { white-space: nowrap; font-size: 14px; }
+    .summary-calculations { padding: 18px 0 8px; border-bottom: 1px solid rgba(255,255,255,.14); }
+    .calc-row { display: flex; justify-content: space-between; margin-bottom: 10px; color: #cbd5e1; font-size: 14px; }
+    .summary-total { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; font-size: 18px; }
+    .summary-total strong { color: var(--accent-gold); font-size: 24px; }
+    .prep-estimate { display: flex; gap: 10px; align-items: center; padding: 13px; border-radius: 7px; background: rgba(255,255,255,.07); }
+    .prep-estimate span { display: flex; flex-direction: column; gap: 3px; }
+    .prep-estimate small { color: #aebbd0; }
+    .confirm-btn {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-
-      span {
-        font-size: 18px;
-        font-weight: 600;
-      }
-      
-      .total-amount {
-        font-size: 24px;
-      }
-    }
-
-    .secure-badge {
-      display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       gap: 8px;
-      background: rgba(255, 255, 255, 0.05);
-      padding: 12px;
-      border-radius: 8px;
-      font-size: 13px;
-      color: #94A3B8;
-
-      svg {
-        color: var(--accent-gold);
-      }
+      width: 100%;
+      margin-top: 18px;
+      padding: 14px;
+      border: 0;
+      border-radius: 7px;
+      background: var(--accent-gold);
+      color: #111827;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
     }
+    .confirm-btn:disabled { opacity: .55; cursor: not-allowed; }
+    .secure-badge { display: flex; justify-content: center; gap: 7px; margin-top: 13px; color: #aebbd0; font-size: 12px; text-align: center; }
+  }
+}
+
+@media (max-width: 900px) {
+  .checkout-container {
+    .checkout-content { grid-template-columns: 1fr; }
+    .order-summary-section { position: static; }
+  }
+}
+
+@media (max-width: 600px) {
+  .checkout-container {
+    padding: 24px 14px 48px;
+    .checkout-heading { display: block; }
+    .checkout-heading p { margin-top: 12px; text-align: left; }
+    .checkout-form-section, .order-summary-section { padding: 22px 18px; }
+    .checkout-form-section .payment-methods { grid-template-columns: 1fr; }
+    .checkout-state { align-items: flex-start; flex-direction: column; }
   }
 }

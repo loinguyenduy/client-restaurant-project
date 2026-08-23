@@ -14,6 +14,7 @@ import {
 } from "../../services/adminService";
 import { toast } from "react-toastify";
 import "./PosTerminal.scss";
+import formatCurrency from "../../utils/formatCurrency";
 
 const PosTerminal = () => {
   const [products, setProducts] = useState([]);
@@ -48,7 +49,9 @@ const PosTerminal = () => {
   };
 
   const addToCart = (product) => {
+    if (!product.is_available || product.stock_quantity <= 0) return toast.warning("This dish is unavailable.");
     const existing = cart.find((item) => item.product_id === product.id);
+    if ((existing?.quantity || 0) >= product.stock_quantity) return toast.warning(`Only ${product.stock_quantity} are available.`);
     if (existing) {
       setCart(
         cart.map((item) =>
@@ -78,7 +81,7 @@ const PosTerminal = () => {
       (sum, item) => sum + item.price * item.quantity,
       0,
     );
-    const tax = subtotal * 0.08;
+    const tax = Math.round(subtotal * 0.08);
     return { subtotal, tax, final: subtotal + tax };
   };
 
@@ -95,8 +98,6 @@ const PosTerminal = () => {
         quantity: i.quantity,
       })),
       // ÉP PAYOS QUAY VỀ TRANG POS TERMINAL THAY VÌ TRANG CỦA CUSTOMER
-      return_url: `${window.location.origin}/admin/pos`,
-      cancel_url: `${window.location.origin}/admin/pos`,
     };
 
     try {
@@ -104,8 +105,13 @@ const PosTerminal = () => {
       if (res && res.EC === 0) {
         if (paymentMethod === "payos") {
           // Mở thẳng tab mới và hiện thông báo chờ
-          window.open(res.DT, "_blank");
-          setWaitingPayos({ isWaiting: true, url: res.DT });
+          if (!res.DT.checkoutUrl) {
+            toast.info("Order saved, but the PayOS link is unavailable.");
+            resetPOS();
+            return;
+          }
+          window.open(res.DT.checkoutUrl, "_blank");
+          setWaitingPayos({ isWaiting: true, url: res.DT.checkoutUrl });
         } else {
           toast.success("Order placed successfully (Cash)!");
           resetPOS();
@@ -156,7 +162,7 @@ const PosTerminal = () => {
               </div>
               <div className="info">
                 <h4>{prod.name}</h4>
-                <span>${prod.price}</span>
+                <span>{formatCurrency(prod.price)}</span>
                 <div className="stock">Stock: {prod.stock_quantity ?? 0}</div>
               </div>
             </div>
@@ -189,7 +195,7 @@ const PosTerminal = () => {
                 <span className="name">{item.name}</span>
               </div>
               <div className="item-price">
-                <span>${(item.price * item.quantity).toFixed(2)}</span>
+                <span>{formatCurrency(item.price * item.quantity)}</span>
                 <button onClick={() => removeFromCart(item.product_id)}>
                   <Trash2 size={14} />
                 </button>
@@ -201,15 +207,15 @@ const PosTerminal = () => {
         <div className="cart-summary">
           <div className="summary-line">
             <span>Subtotal</span>
-            <span>${calculateTotal().subtotal.toFixed(2)}</span>
+            <span>{formatCurrency(calculateTotal().subtotal)}</span>
           </div>
           <div className="summary-line">
             <span>Tax (8%)</span>
-            <span>${calculateTotal().tax.toFixed(2)}</span>
+            <span>{formatCurrency(calculateTotal().tax)}</span>
           </div>
           <div className="total-line">
             <span>Total</span>
-            <span>${calculateTotal().final.toFixed(2)}</span>
+            <span>{formatCurrency(calculateTotal().final)}</span>
           </div>
         </div>
 
@@ -306,7 +312,7 @@ const PosTerminal = () => {
                 marginBottom: "24px",
               }}
             >
-              Total: ${calculateTotal().final.toFixed(2)}
+              Total: {formatCurrency(calculateTotal().final)}
             </p>
             <div className="modal-actions">
               <button

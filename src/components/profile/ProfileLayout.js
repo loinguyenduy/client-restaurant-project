@@ -18,11 +18,12 @@ const ProfileLayout = () => {
     const handleLogout = async () => {
         try {
             await logoutUserApi();
+        } catch (error) {
+            console.error("Logout request error", error);
+        } finally {
             dispatch(doLogoutSuccess());
             dispatch(doClearCart());
             navigate('/');
-        } catch (error) {
-            console.error("Logout error", error);
         }
     };
 
