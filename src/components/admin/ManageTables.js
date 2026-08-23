@@ -1,154 +1,201 @@
-import React, { useEffect, useState } from 'react';
-import { Plus, Trash2, Loader } from 'lucide-react';
-import { toast } from 'react-toastify';
-import { useSelector } from 'react-redux';
-import Swal from 'sweetalert2';
-import { getAllTablesApi, createTableApi, updateTableStatusApi, deleteTableApi } from '../../services/adminService';
-import './AdminTable.scss';
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Plus, RefreshCw } from "lucide-react";
+import { useSelector } from "react-redux";
+import Swal from "sweetalert2";
+import { toast } from "react-toastify";
+import {
+  createTableApi,
+  deleteTableApi,
+  getAllTablesApi,
+  updateTableApi,
+  updateTableStatusApi,
+} from "../../services/adminService";
+import { getSocket } from "../../services/socketService";
+import TableFormModal from "./tables/TableFormModal";
+import TableMap from "./tables/TableMap";
+import "./tables/ManageTables.scss";
 
 const ManageTables = () => {
-    const isAdmin = useSelector(state => state.auth.account.role === 'admin');
-    const [tables, setTables] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
+  const isAdmin = useSelector((state) => state.auth.account.role === "admin");
+  const [tables, setTables] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [busyId, setBusyId] = useState("");
+  const [formTable, setFormTable] = useState(null);
+  const [formOpen, setFormOpen] = useState(false);
+  const [formBusy, setFormBusy] = useState(false);
+  const socketTimer = useRef();
 
-    useEffect(() => {
-        fetchTables();
-    }, []);
+  const loadTables = useCallback(async ({ quiet = false } = {}) => {
+    if (!quiet) setLoading(true);
+    try {
+      const response = await getAllTablesApi();
+      if (response?.EC !== 0 || !Array.isArray(response.DT)) {
+        throw new Error(response?.EM || "Unable to load the table map.");
+      }
+      setTables(response.DT);
+      setError("");
+    } catch (requestError) {
+      setError(requestError?.response?.data?.EM || requestError.message || "Unable to load the table map.");
+    } finally {
+      if (!quiet) setLoading(false);
+    }
+  }, []);
 
-    const fetchTables = async () => {
-        setIsLoading(true);
-        try {
-            const res = await getAllTablesApi();
-            if (res && res.EC === 0) {
-                setTables(res.DT);
-            } else toast.error(res.EM || "Failed to fetch tables");
-        } catch (error) { toast.error("Server error"); }
-        setIsLoading(false);
+  useEffect(() => {
+    loadTables();
+  }, [loadTables]);
+
+  useEffect(() => {
+    const socket = getSocket();
+    const queueRefresh = () => {
+      clearTimeout(socketTimer.current);
+      socketTimer.current = setTimeout(() => loadTables({ quiet: true }), 250);
     };
-
-    const handleAddTable = async () => {
-        const { value: formValues } = await Swal.fire({
-            title: 'Add New Table',
-            html:
-                '<input id="swal-input1" class="swal2-input" placeholder="Table Number (e.g. T01)">' +
-                '<input id="swal-input2" type="number" class="swal2-input" placeholder="Capacity (e.g. 4)">',
-            focusConfirm: false,
-            showCancelButton: true,
-            confirmButtonColor: '#0F172A',
-            preConfirm: () => {
-                const table_number = document.getElementById('swal-input1').value;
-                const capacity = document.getElementById('swal-input2').value;
-                if (!table_number || !capacity) {
-                    Swal.showValidationMessage('Please enter both fields');
-                    return null;
-                }
-                return { table_number, capacity };
-            }
-        });
-
-        if (formValues) {
-            try {
-                let res = await createTableApi(formValues);
-                if (res && res.EC === 0) {
-                    toast.success("Table added successfully!");
-                    fetchTables();
-                } else toast.error(res.EM);
-            } catch (e) { toast.error("Error adding table"); }
-        }
+    socket.on("table:status_changed", queueRefresh);
+    socket.on("connect", queueRefresh);
+    return () => {
+      clearTimeout(socketTimer.current);
+      socket.off("table:status_changed", queueRefresh);
+      socket.off("connect", queueRefresh);
     };
+  }, [loadTables]);
 
-    const handleStatusChange = async (tableId, newStatus) => {
-        try {
-            let res = await updateTableStatusApi(tableId, newStatus);
-            if (res && res.EC === 0) {
-                toast.success("Status updated!");
-                fetchTables();
-            } else toast.error(res.EM);
-        } catch (e) { toast.error("Error updating status"); }
-    };
+  const openCreate = () => {
+    setFormTable(null);
+    setFormOpen(true);
+  };
 
-    const handleDeleteTable = async (tableId, tableNumber) => {
-        const isConfirm = await Swal.fire({
-            title: 'Delete Table?',
-            text: `Are you sure you want to delete table ${tableNumber}?`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#DC2626',
-            confirmButtonText: 'Yes, delete it!'
-        });
+  const openEdit = (table) => {
+    setFormTable(table);
+    setFormOpen(true);
+  };
 
-        if (isConfirm.isConfirmed) {
-            try {
-                let res = await deleteTableApi(tableId);
-                if (res && res.EC === 0) {
-                    toast.success("Table deleted!");
-                    fetchTables();
-                } else toast.error(res.EM);
-            } catch (e) { toast.error("Error deleting table"); }
-        }
-    };
+  const saveTable = async (values) => {
+    setFormBusy(true);
+    try {
+      const response = formTable
+        ? await updateTableApi(formTable.id, values)
+        : await createTableApi(values);
+      if (response?.EC !== 0) throw new Error(response?.EM || "Unable to save table.");
+      toast.success(formTable ? "Table details updated." : "Table created.");
+      setFormOpen(false);
+      setFormTable(null);
+      await loadTables({ quiet: true });
+    } catch (requestError) {
+      toast.error(requestError?.response?.data?.EM || requestError.message || "Unable to save table.");
+    } finally {
+      setFormBusy(false);
+    }
+  };
 
-    return (
-        <div className="admin-page-container">
-            <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h1>Manage Tables</h1>
-                {isAdmin && <button
-                    onClick={handleAddTable}
-                    style={{ background: '#0F172A', color: 'white', border: 'none', padding: '10px 16px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
-                >
-                    <Plus size={18} /> Add Table
-                </button>}
-            </div>
+  const changeStatus = async (table, status, confirmation) => {
+    if (confirmation) {
+      const result = await Swal.fire({
+        title: "Confirm table status change",
+        text: confirmation,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#b68b2e",
+        confirmButtonText: "Continue",
+      });
+      if (!result.isConfirmed) return;
+    }
 
-            <div className="table-card">
-                <div className="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>TABLE NUMBER</th>
-                                <th>CAPACITY</th>
-                                <th>STATUS</th>
-                                <th className="text-right">ACTIONS</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {isLoading ? (
-                                <tr><td colSpan="4" className="empty-state"><Loader className="spin" size={24}/></td></tr>
-                            ) : tables.length === 0 ? (
-                                <tr><td colSpan="4" className="empty-state">No tables found.</td></tr>
-                            ) : (
-                                tables.map(table => (
-                                    <tr key={table.id}>
-                                        <td><span className="primary-text">{table.table_number}</span></td>
-                                        <td><span className="secondary-text">{table.capacity} Persons</span></td>
-                                        <td>
-                                            <select 
-                                                className="status-select"
-                                                value={table.status}
-                                                onChange={(e) => handleStatusChange(table.id, e.target.value)}
-                                            >
-                                                <option value="available">Available</option>
-                                                <option value="occupied">Occupied</option>
-                                                <option value="reserved">Reserved</option>
-                                            </select>
-                                        </td>
-                                        <td className="text-right">
-                                            {isAdmin && <button
-                                                onClick={() => handleDeleteTable(table.id, table.table_number)}
-                                                style={{ background: 'none', border: 'none', color: '#DC2626', cursor: 'pointer' }}
-                                            >
-                                                <Trash2 size={18} />
-                                            </button>}
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+    setBusyId(table.id);
+    try {
+      const response = await updateTableStatusApi(table.id, status);
+      if (response?.EC !== 0) throw new Error(response?.EM || "Unable to update table status.");
+      toast.success("Table status updated.");
+      await loadTables({ quiet: true });
+    } catch (requestError) {
+      toast.error(requestError?.response?.data?.EM || requestError.message || "Unable to update table status.");
+    } finally {
+      setBusyId("");
+    }
+  };
+
+  const removeTable = async (table) => {
+    const result = await Swal.fire({
+      title: `Delete ${table.table_number}?`,
+      text: "Tables referenced by an order or reservation cannot be deleted. Use Out of Service instead.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#b42318",
+      confirmButtonText: "Delete table",
+    });
+    if (!result.isConfirmed) return;
+
+    setBusyId(table.id);
+    try {
+      const response = await deleteTableApi(table.id);
+      if (response?.EC !== 0) throw new Error(response?.EM || "Unable to delete table.");
+      toast.success("Table deleted.");
+      await loadTables({ quiet: true });
+    } catch (requestError) {
+      toast.error(requestError?.response?.data?.EM || requestError.message || "Unable to delete table.");
+    } finally {
+      setBusyId("");
+    }
+  };
+
+  return (
+    <main className="manage-tables-page">
+      <header className="manage-tables-header">
+        <div>
+          <span className="page-eyebrow">Restaurant floor</span>
+          <h1>Table Map</h1>
+          <p>Physical table status and active dine-in orders. Occupancy is managed by POS and order completion.</p>
         </div>
-    );
+        <div className="manage-tables-header-actions">
+          <button type="button" className="secondary" onClick={() => loadTables()} disabled={loading}>
+            <RefreshCw size={17} className={loading ? "spin" : ""} /> Refresh
+          </button>
+          {isAdmin && (
+            <button type="button" className="primary" onClick={openCreate}>
+              <Plus size={18} /> Create Table
+            </button>
+          )}
+        </div>
+      </header>
+
+      {loading ? (
+        <section className="table-map-state" aria-live="polite">
+          <RefreshCw className="spin" /> Loading table map...
+        </section>
+      ) : error ? (
+        <section className="table-map-state error" role="alert">
+          <strong>Table map is unavailable</strong>
+          <p>{error}</p>
+          <button type="button" onClick={() => loadTables()}>Try again</button>
+        </section>
+      ) : tables.length === 0 ? (
+        <section className="table-map-state">
+          <strong>No tables configured</strong>
+          <p>{isAdmin ? "Create the first physical table to begin." : "Ask an administrator to configure the restaurant floor."}</p>
+          {isAdmin && <button type="button" onClick={openCreate}>Create Table</button>}
+        </section>
+      ) : (
+        <TableMap
+          tables={tables}
+          isAdmin={isAdmin}
+          busyId={busyId}
+          onStatus={changeStatus}
+          onEdit={openEdit}
+          onDelete={removeTable}
+        />
+      )}
+
+      {formOpen && (
+        <TableFormModal
+          table={formTable}
+          busy={formBusy}
+          onClose={() => { if (!formBusy) setFormOpen(false); }}
+          onSubmit={saveTable}
+        />
+      )}
+    </main>
+  );
 };
 
 export default ManageTables;

@@ -211,7 +211,7 @@
                 border: 1px solid var(--primary-navy);
               }
 
-              &.booked {
+              &.booked, &.unavailable {
                 background-color: #F8FAFC;
                 border: 1px solid #E2E8F0;
                 color: #94A3B8;
@@ -222,6 +222,10 @@
           }
         }
       }
+
+      .loading-slots.error { padding: 18px; border: 1px solid #fecaca; border-radius: 7px; background: #fff7f7; color: #991b1b; text-align: center; }
+      .loading-slots.error p { margin: 0 0 8px; }
+      .loading-slots.error button { border: 0; background: none; color: inherit; font-weight: 700; cursor: pointer; }
 
       .step-actions {
         margin-top: 40px;
@@ -244,6 +248,8 @@
         }
       }
     }
+
+    .reservation-form-error { width: 100%; margin: 0 0 10px; color: #b91c1c; font-weight: 600; text-align: right; }
 
     /* STEP 2 STYLES */
     .step-2-container {

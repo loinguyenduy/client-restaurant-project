@@ -2,17 +2,17 @@ import axios from "../utils/axios";
 
 export const getDashboardStatsApi = () => axios.get('/manage/dashboard-stats');
 
-export const getAllOrdersAdminApi = (page, limit, status) => {
-    return axios.get(`/manage/orders?page=${page}&limit=${limit}&status=${status || 'all'}`);
+export const getAllOrdersAdminApi = (options = {}) => {
+    return axios.get('/manage/orders', { params: options });
 };
+export const getManagedOrderDetailsApi = (orderId) => axios.get(`/manage/orders/${orderId}`);
 export const updateOrderStatusApi = (orderId, status) => {
     return axios.put(`/manage/orders/${orderId}/status`, { status });
 };
 export const getKitchenOrdersApi = () => axios.get('/manage/orders/kitchen');
 
-export const getAllReservationsAdminApi = (page, limit, status, date) => {
-    return axios.get(`/manage/reservations?page=${page}&limit=${limit}&status=${status || 'all'}&date=${date || ''}`);
-};
+export const getAllReservationsAdminApi = (options = {}) => axios.get('/manage/reservations', { params: options });
+export const getManagedReservationDetailsApi = (reservationId) => axios.get(`/manage/reservations/${reservationId}`);
 export const updateReservationStatusApi = (reservationId, status) => {
     return axios.put(`/manage/reservations/${reservationId}/status`, { status });
 };
@@ -75,6 +75,7 @@ export const getAttendanceLogsApi = (page = 1, limit = 20, userId = '') => {
 // --- TABLE MANAGEMENT API ---
 export const getAllTablesApi = () => axios.get('/manage/tables');
 export const createTableApi = (tableData) => axios.post('/manage/tables', tableData);
+export const updateTableApi = (id, tableData) => axios.put(`/manage/tables/${id}`, tableData);
 export const updateTableStatusApi = (id, status) => axios.put(`/manage/tables/${id}/status`, { status });
 export const deleteTableApi = (id) => axios.delete(`/manage/tables/${id}`);
 

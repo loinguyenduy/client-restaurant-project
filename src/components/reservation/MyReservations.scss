@@ -41,6 +41,13 @@
     margin-bottom: 24px;
   }
 
+  .reservation-groups { display: grid; gap: 36px; }
+  .reservation-groups > section > h2 { display: flex; align-items: center; gap: 8px; margin: 0 0 16px; color: var(--primary-navy); font-size: 18px; }
+  .reservation-groups > section > h2 span { display: grid; place-items: center; min-width: 25px; height: 25px; border-radius: 50%; background: #e2e8f0; font-size: 12px; }
+  .group-empty { padding: 24px; border: 1px dashed #cbd5e1; color: #64748b; text-align: center; }
+  .reservation-page-state { display: grid; justify-items: center; gap: 8px; padding: 50px 20px; border: 1px solid #dbe3ec; border-radius: 10px; background: #fff; color: #64748b; text-align: center; }
+  .reservation-page-state h2, .reservation-page-state p { margin: 0; }.reservation-page-state button { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; padding: 9px 14px; border: 0; border-radius: 6px; background: var(--primary-navy); color: #fff; font-weight: 700; cursor: pointer; }.reservation-page-state.error { color: #991b1b; background: #fff7f7; }
+
   .reservations-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
@@ -62,6 +69,9 @@
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid #FFE4D6;
+
+      > div { display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; }
+      small { color: #64748b; }
 
       .status-info {
         display: flex;
@@ -90,6 +100,9 @@
         text-transform: capitalize;
         &.pending { background: #FEF3C7; color: #D97706; }
         &.confirmed { background: #DCFCE7; color: #16A34A; }
+        &.seated { background: #dbeafe; color: #1d4ed8; }
+        &.completed { background: #e2e8f0; color: #334155; }
+        &.cancelled, &.no_show { background: #fee2e2; color: #b91c1c; }
       }
     }
 
@@ -144,6 +157,14 @@
       &:hover { background: #FEF2F2; border-color: #DC2626; }
     }
   }
+}
+
+@media (max-width: 640px) {
+  .my-reservations-container { padding: 28px 14px; }
+  .my-reservations-container .header-section { display: block; margin-bottom: 26px; }
+  .my-reservations-container .header-section .btn-book-more { margin-top: 14px; }
+  .my-reservations-container .reservations-grid { grid-template-columns: 1fr; }
+  .my-reservations-container .res-card .card-header > div { align-items: flex-start; flex-direction: column; }
 }
 
 .spin { animation: spin 1s linear infinite; }

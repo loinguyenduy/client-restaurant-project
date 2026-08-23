@@ -5,6 +5,7 @@ import { Calendar, Clock, Users, Info, ArrowLeft, CheckCircle } from 'lucide-rea
 import { toast } from 'react-toastify';
 import { getAvailableSlotsApi, createReservationApi } from '../../services/reservationService';
 import './Reservation.scss';
+import { getRestaurantDateInputValue } from '../../utils/reservationTime';
 
 const ReservationPage = () => {
     const navigate = useNavigate();
@@ -15,18 +16,17 @@ const ReservationPage = () => {
     const [availableSlots, setAvailableSlots] = useState([]);
     const [isLoadingSlots, setIsLoadingSlots] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [slotsError, setSlotsError] = useState('');
+    const [formError, setFormError] = useState('');
 
     // Lấy ngày mai làm mặc định (định dạng YYYY-MM-DD)
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const defaultDate = tomorrow.toISOString().split('T')[0];
+    const defaultDate = getRestaurantDateInputValue(1);
 
     const [reservationData, setReservationData] = useState({
         date: defaultDate,
         partySize: 2,
         time: '',
         contact_name: account?.username || '',
-        email: account?.email || '',
         contact_phone: account?.phone_number || '', // Đã đồng bộ trường phone_number
         note: ''
     });
@@ -38,6 +38,7 @@ const ReservationPage = () => {
 
     const fetchAvailableSlots = async () => {
         setIsLoadingSlots(true);
+        setSlotsError('');
         // Reset giờ đã chọn nếu đổi ngày/số người
         setReservationData(prev => ({ ...prev, time: '' })); 
         
@@ -46,11 +47,11 @@ const ReservationPage = () => {
             if (res && res.EC === 0) {
                 setAvailableSlots(res.DT);
             } else {
-                toast.error(res.EM || "Could not load available time slots.");
+                setSlotsError(res.EM || "Could not load available time slots.");
             }
         } catch (error) {
             console.error("Fetch slots error:", error);
-            toast.error("Server error while loading slots.");
+            setSlotsError("Server error while loading slots.");
         }
         setIsLoadingSlots(false);
     };
@@ -62,7 +63,7 @@ const ReservationPage = () => {
     };
 
     const handleTimeSelect = (timeStr, status) => {
-        if (status === 'booked') return;
+        if (status !== 'available') return;
         setReservationData({ ...reservationData, time: timeStr });
     };
 
@@ -80,8 +81,9 @@ const ReservationPage = () => {
     };
 
     const handleConfirmBooking = async () => {
+        setFormError('');
         if (!reservationData.contact_name || !reservationData.contact_phone) {
-            toast.error("Please fill in your name and phone number.");
+            setFormError("Please fill in your name and phone number.");
             return;
         }
 
@@ -162,7 +164,7 @@ const ReservationPage = () => {
                                         name="date" 
                                         value={reservationData.date} 
                                         onChange={handleInputChange} 
-                                        min={new Date().toISOString().split('T')[0]} // Không cho đặt ngày trong quá khứ
+                                        min={getRestaurantDateInputValue()}
                                     />
                                 </div>
                                 <div className="input-group">
@@ -181,7 +183,7 @@ const ReservationPage = () => {
                                 <span className="legend-item"><span className="dot booked"></span> Booked</span>
                             </div>
 
-                            {isLoadingSlots ? (
+                            {slotsError ? <div className="loading-slots error" role="alert"><p>{slotsError}</p><button type="button" onClick={fetchAvailableSlots}>Retry</button></div> : isLoadingSlots ? (
                                 <div className="loading-slots">Checking availability...</div>
                             ) : (
                                 <div className="time-grids">
@@ -192,7 +194,7 @@ const ReservationPage = () => {
                                                 <button 
                                                     key={index}
                                                     className={`slot-btn ${slot.status} ${reservationData.time === slot.time ? 'selected' : ''}`}
-                                                    disabled={slot.status === 'booked'}
+                                                    disabled={slot.status !== 'available'}
                                                     onClick={() => handleTimeSelect(slot.time, slot.status)}
                                                 >
                                                     {slot.time}
@@ -208,7 +210,7 @@ const ReservationPage = () => {
                                                 <button 
                                                     key={index}
                                                     className={`slot-btn ${slot.status} ${reservationData.time === slot.time ? 'selected' : ''}`}
-                                                    disabled={slot.status === 'booked'}
+                                                    disabled={slot.status !== 'available'}
                                                     onClick={() => handleTimeSelect(slot.time, slot.status)}
                                                 >
                                                     {slot.time}
@@ -248,10 +250,6 @@ const ReservationPage = () => {
                                     <input type="text" name="contact_phone" value={reservationData.contact_phone} onChange={handleInputChange} placeholder="+1 (555) 000-0000" />
                                 </div>
                                 <div className="input-group full-width">
-                                    <label>Email (Optional)</label>
-                                    <input type="email" name="email" value={reservationData.email} onChange={handleInputChange} placeholder="john@example.com" />
-                                </div>
-                                <div className="input-group full-width">
                                     <label>Special Requests (Optional)</label>
                                     <textarea 
                                         name="note" 
@@ -264,6 +262,7 @@ const ReservationPage = () => {
                             </div>
 
                             <div className="step-actions confirmation">
+                                {formError && <p className="reservation-form-error" role="alert">{formError}</p>}
                                 <p>By confirming, you agree to our reservation policy.</p>
                                 <button 
                                     className="btn-confirm" 

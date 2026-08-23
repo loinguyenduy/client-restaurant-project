@@ -64,7 +64,7 @@ const AdminSidebar = () => {
           <MonitorSmartphone size={18} /> POS Terminal
         </NavLink>
         <NavLink to={`${basePath}/tables`} className={navClass}>
-          <Table size={18} /> {isAdmin ? "Manage Tables" : "Table Status"}
+          <Table size={18} /> Table Map
         </NavLink>
 
         {!isAdmin && (
