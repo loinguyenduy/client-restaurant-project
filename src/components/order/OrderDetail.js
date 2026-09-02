@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Clock3, RefreshCw } from "lucide-react";
+import { ArrowLeft, Clock3, Pencil, ReceiptText, RefreshCw } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import Swal from "sweetalert2";
 import { toast } from "react-toastify";
@@ -10,6 +10,7 @@ import { formatDateTime, formatStatus, getFulfillmentLabel } from "../../utils/o
 import OrderStatusTimeline from "./OrderStatusTimeline";
 import "./OrderDetail.scss";
 import { getSocket } from "../../services/socketService";
+import OrderReviewForm, { ReviewStars } from "../review/OrderReviewForm";
 
 const OrderDetail = () => {
   const { id } = useParams();
@@ -18,6 +19,7 @@ const OrderDetail = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [isBusy, setIsBusy] = useState(false);
+  const [editingReview, setEditingReview] = useState(false);
   const hasConnectedRef = useRef(false);
 
   const loadOrder = async () => {
@@ -27,6 +29,7 @@ const OrderDetail = () => {
       const response = await getUserOrderDetailsApi(id);
       if (response?.EC !== 0) throw new Error(response?.EM);
       setOrder(response.DT);
+      setEditingReview(false);
     } catch (error) {
       setErrorMessage(error?.EM || error?.message || "The order could not be loaded.");
     } finally {
@@ -100,10 +103,17 @@ const OrderDetail = () => {
       {order.requires_manual_refund && <div className="detail-alert">This cancelled order was paid after cancellation. Contact the restaurant for a manual PayOS refund.</div>}
       <div className="detail-grid">
         <section className="tracking-panel"><h2>Order progress</h2>{order.estimated_ready_at && !["completed", "cancelled"].includes(order.order_status) && <div className="ready-time"><Clock3 /><span><small>Estimated ready</small><strong>{formatDateTime(order.estimated_ready_at)}</strong></span></div>}<OrderStatusTimeline order={order} /></section>
-        <aside className="detail-summary"><h2>Pickup summary</h2><div><span>Contact</span><strong>{order.contact_name || "Legacy customer"}</strong></div><div><span>Phone</span><strong>{order.phone_receiver || "—"}</strong></div><div><span>Payment</span><strong>{formatStatus(order.payment_method)} · {formatStatus(order.payment_status)}</strong></div><div><span>Total</span><strong>{formatCurrency(order.final_amount)}</strong></div>{order.note && <div className="detail-note"><span>Note</span><p>{order.note}</p></div>}</aside>
+        <aside className="detail-summary"><h2>Order summary</h2>{order.contact_name && <div><span>Customer</span><strong>{order.contact_name}</strong></div>}{order.phone_receiver && <div><span>Phone</span><strong>{order.phone_receiver}</strong></div>}<div><span>Payment</span><strong>{formatStatus(order.payment_method)} · {formatStatus(order.payment_status)}</strong></div><div><span>Total</span><strong>{formatCurrency(order.final_amount)}</strong></div>{order.note && <div className="detail-note"><span>Note</span><p>{order.note}</p></div>}</aside>
       </div>
-      <section className="detail-items"><h2>Items</h2>{(order.OrderItems || []).map((item) => <div className="detail-item" key={item.id}><ProductImage src={item.Product?.image_url} alt={item.Product?.name || "Dish"} /><div><strong>{item.Product?.name || "Legacy dish"}</strong><span>{item.quantity} × {formatCurrency(item.price)}</span></div><strong>{formatCurrency(Number(item.price) * item.quantity)}</strong></div>)}</section>
-      {canManagePayment && <div className="detail-actions"><button type="button" className="pay-action" onClick={payAgain} disabled={isBusy}>Pay with PayOS</button><button type="button" className="cancel-action" onClick={cancelOrder} disabled={isBusy}>Cancel order</button></div>}
+      <section className="detail-items"><h2>Items</h2>{(order.OrderItems || []).map((item) => <div className="detail-item" key={item.id}><ProductImage src={item.Product?.image_url} alt={item.product_name || item.Product?.name || "Dish"} /><div><strong>{item.product_name || item.Product?.name || "Legacy dish"}</strong><span>{item.quantity} × {formatCurrency(item.price)}</span></div><strong>{formatCurrency(Number(item.price) * item.quantity)}</strong></div>)}</section>
+      {order.order_status === "completed" && <section className="order-review-section">
+        <div className="order-review-heading"><div><span>{order.review ? "Your review" : "How was your experience?"}</span><h2>{order.review ? "Thank you for sharing" : "Review this order"}</h2></div>{order.review && !editingReview && <button type="button" onClick={() => setEditingReview(true)}><Pencil size={15} /> Edit Review</button>}</div>
+        {order.review && !editingReview ? <div className="order-review-content"><ReviewStars value={order.review.rating} size={20} /><p>{order.review.comment}</p><small>{order.review.updatedAt && order.review.updatedAt !== order.review.createdAt ? `Updated ${formatDateTime(order.review.updatedAt)}` : `Submitted ${formatDateTime(order.review.createdAt)}`}</small>{order.review.status === "hidden" && <p className="review-hidden-note">This review is currently hidden by moderation.</p>}</div> : <OrderReviewForm orderId={order.id} review={order.review} onCancel={order.review ? () => setEditingReview(false) : undefined} onSaved={loadOrder} />}
+      </section>}
+      <div className="detail-actions">
+        <button type="button" onClick={() => navigate(`/my-orders/${order.id}/invoice`)}><ReceiptText size={16} /> View invoice</button>
+        {canManagePayment && <><button type="button" className="pay-action" onClick={payAgain} disabled={isBusy}>Pay with PayOS</button><button type="button" className="cancel-action" onClick={cancelOrder} disabled={isBusy}>Cancel order</button></>}
+      </div>
     </main>
   );
 };

@@ -56,7 +56,6 @@ const ProductForm = ({ categories, editingProduct, onSaved, onCancelEdit }) => {
     const { name, value, checked, type } = event.target;
     setForm((current) => {
       const next = { ...current, [name]: type === "checkbox" ? checked : value };
-      if (name === "stock_quantity" && Number(value) <= 0) next.is_available = false;
       return next;
     });
   };
@@ -89,7 +88,7 @@ const ProductForm = ({ categories, editingProduct, onSaved, onCancelEdit }) => {
     if (!form.name.trim()) return "Dish name is required.";
     if (!form.category_id) return "Category is required.";
     if (!Number.isSafeInteger(Number(form.price)) || Number(form.price) <= 0) return "Price must be a positive VND integer.";
-    if (!Number.isInteger(Number(form.stock_quantity)) || Number(form.stock_quantity) < 0) return "Stock must be a non-negative integer.";
+    if (!editingProduct && (!Number.isInteger(Number(form.stock_quantity)) || Number(form.stock_quantity) < 0)) return "Stock must be a non-negative integer.";
     const prepTime = Number(form.prep_time_minutes);
     if (!Number.isInteger(prepTime) || prepTime < 1 || prepTime > 180) return "Preparation time must be between 1 and 180 minutes.";
     if (form.original_price !== "" && (!Number.isSafeInteger(Number(form.original_price)) || Number(form.original_price) < 0)) return "Original price must be a non-negative VND integer.";
@@ -108,11 +107,11 @@ const ProductForm = ({ categories, editingProduct, onSaved, onCancelEdit }) => {
     payload.append("name", form.name.trim());
     payload.append("price", form.price);
     if (form.original_price !== "") payload.append("original_price", form.original_price);
-    payload.append("stock_quantity", form.stock_quantity);
+    if (!editingProduct) payload.append("stock_quantity", form.stock_quantity);
     payload.append("prep_time_minutes", form.prep_time_minutes);
     payload.append("category_id", form.category_id);
     payload.append("description", form.description.trim());
-    payload.append("is_available", Number(form.stock_quantity) > 0 ? form.is_available : false);
+    payload.append("is_available", form.is_available);
     if (imageFile) payload.append("image", imageFile);
 
     setIsSubmitting(true);
@@ -142,7 +141,8 @@ const ProductForm = ({ categories, editingProduct, onSaved, onCancelEdit }) => {
         <label>Dish name<input type="text" name="name" maxLength={150} value={form.name} onChange={changeField} required /></label>
         <label>Price (VND)<input type="number" name="price" min="1" step="1" value={form.price} onChange={changeField} required /></label>
         <label>Original price (VND, optional)<input type="number" name="original_price" min="0" step="1" value={form.original_price} onChange={changeField} /></label>
-        <label>Stock quantity<input type="number" name="stock_quantity" min="0" step="1" value={form.stock_quantity} onChange={changeField} required /></label>
+        {!editingProduct && <label>Initial stock<input type="number" name="stock_quantity" min="0" step="1" value={form.stock_quantity} onChange={changeField} required /></label>}
+        {editingProduct && <div className="stock-managed-note"><span>Current stock</span><strong>{editingProduct.stock_quantity}</strong><small>Use Inventory to restock or adjust this quantity.</small></div>}
         <label>Preparation time (minutes)<input type="number" name="prep_time_minutes" min="1" max="180" step="1" value={form.prep_time_minutes} onChange={changeField} required /></label>
         <label>Category<select name="category_id" value={form.category_id} onChange={changeField} required><option value="">Select category</option>{categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
       </div>
@@ -157,7 +157,7 @@ const ProductForm = ({ categories, editingProduct, onSaved, onCancelEdit }) => {
       </div>
 
       <label className="checkbox-label">
-        <input type="checkbox" name="is_available" checked={form.is_available} onChange={changeField} disabled={Number(form.stock_quantity) <= 0} />
+        <input type="checkbox" name="is_available" checked={form.is_available} onChange={changeField} />
         Available for ordering
       </label>
 

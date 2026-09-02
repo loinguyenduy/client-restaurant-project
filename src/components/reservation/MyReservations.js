@@ -13,7 +13,7 @@ const statusLabel = (status) => status === "pending" ? "Pending confirmation" : 
 
 const ReservationCard = ({ reservation, cancellingId, onCancel }) => <article className={`res-card ${reservation.status}`}>
   <header className="card-header"><div><span className={`badge ${reservation.status}`}>{statusLabel(reservation.status)}</span><small>Booked {new Date(reservation.createdAt).toLocaleDateString()}</small></div></header>
-  <div className="card-body"><div className="info-main"><div className="date-time"><label>Date & time</label><p className="primary-text">{formatReservationDate(reservation.reservation_time)}</p><p className="secondary-text">{formatReservationTime(reservation.reservation_time)}</p></div><div className="party-size"><label>Party size</label><div className="guest-count"><Users size={18} /><span>{reservation.number_of_people}</span></div></div></div><div className="info-contact"><p>Contact: <strong>{reservation.contact_name || "Legacy contact"}</strong></p><p>Phone: <strong>{reservation.contact_phone || "—"}</strong></p>{reservation.note && <p className="note">Note: “{reservation.note}”</p>}</div></div>
+  <div className="card-body"><div className="info-main"><div className="date-time"><label>Date & time</label><p className="primary-text">{formatReservationDate(reservation.reservation_time)}</p><p className="secondary-text">{formatReservationTime(reservation.reservation_time)}</p></div><div className="party-size"><label>Party size</label><div className="guest-count"><Users size={18} /><span>{reservation.number_of_people}</span></div></div></div><div className="info-contact">{reservation.Table?.table_number && <p className="assigned-table">Assigned table: <strong>{reservation.Table.table_number}</strong></p>}<p>Contact: <strong>{reservation.contact_name || "Legacy contact"}</strong></p><p>Phone: <strong>{reservation.contact_phone || "—"}</strong></p>{reservation.note && <p className="note">Note: “{reservation.note}”</p>}</div></div>
   {reservation.can_customer_cancel && <button type="button" className="btn-cancel" onClick={() => onCancel(reservation)} disabled={cancellingId === reservation.id}>{cancellingId === reservation.id ? <Loader size={14} className="spin" /> : <XCircle size={16} />} Cancel Reservation</button>}
 </article>;
 
@@ -47,8 +47,9 @@ const MyReservations = () => {
     };
     const reconnect = () => { if (hasConnectedRef.current) fetchReservations({ quiet: true }); hasConnectedRef.current = true; };
     socket.on("reservation:status_changed", refresh);
+    socket.on("reservation:assigned", refresh);
     socket.on("connect", reconnect);
-    return () => { socket.off("reservation:status_changed", refresh); socket.off("connect", reconnect); };
+    return () => { socket.off("reservation:status_changed", refresh); socket.off("reservation:assigned", refresh); socket.off("connect", reconnect); };
   }, [fetchReservations]);
 
   const handleCancel = async (reservation) => {

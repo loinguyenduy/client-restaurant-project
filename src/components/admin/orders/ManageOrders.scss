@@ -3,7 +3,9 @@
 .managed-page-header h1 { margin: 0; font-size: 26px; }
 .managed-page-header p { margin: 6px 0 0; color: #64748b; }
 .managed-page-header button, .filter-reset { display: inline-flex; align-items: center; gap: 6px; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; color: #334155; font-weight: 700; cursor: pointer; }
-.order-filters { display: grid; grid-template-columns: minmax(240px, 2fr) repeat(4, minmax(145px, 1fr)); gap: 10px; margin-bottom: 12px; padding: 14px; border: 1px solid #dbe3ec; border-radius: 9px; background: #fff; }
+.order-filters { margin-bottom: 12px; padding: 14px; border: 1px solid #dbe3ec; border-radius: 9px; background: #fff; }
+.order-filter-search-area { margin-bottom: 10px; }
+.order-filter-control-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; align-items: end; }
 .order-filters input, .order-filters select { width: 100%; min-height: 39px; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 5px; background: #fff; color: #334155; font: inherit; font-size: 13px; }
 .order-filters label > span { display: block; margin-bottom: 4px; color: #64748b; font-size: 11px; font-weight: 700; text-transform: uppercase; }
 .order-search { position: relative; align-self: end; }
@@ -42,9 +44,10 @@
 .managed-totals { margin: 0 24px; padding: 15px; background: #f8fafc; }.managed-totals > div { display: flex; justify-content: space-between; padding: 5px 0; }.managed-totals .final { margin-top: 6px; padding-top: 11px; border-top: 1px solid #cbd5e1; font-size: 17px; }
 .managed-detail > footer { display: flex; justify-content: flex-end; padding: 18px 24px 28px; }.managed-detail > footer button { display: inline-flex; align-items: center; gap: 7px; padding: 10px 14px; border: 0; border-radius: 6px; background: #0f172a; color: #fff; font-weight: 800; cursor: pointer; }
 
-@media (max-width: 1180px) { .order-filters { grid-template-columns: repeat(3, 1fr); }.order-search { grid-column: span 2; } }
+@media (max-width: 1180px) { .order-filter-control-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 760px) {
-  .managed-page-header { display: block; }.managed-page-header button { margin-top: 12px; }.order-filters { grid-template-columns: 1fr 1fr; }.order-search { grid-column: 1 / -1; }
+  .managed-page-header { display: block; }.managed-page-header button { margin-top: 12px; }.order-filter-control-grid { grid-template-columns: 1fr 1fr; }
   .managed-order-table table, .managed-order-table tbody, .managed-order-table tr, .managed-order-table td { display: block; }.managed-order-table thead { display: none; }.managed-order-table tr { padding: 13px 15px; border-bottom: 1px solid #dbe3ec; }.managed-order-table td { display: grid; grid-template-columns: 105px 1fr; gap: 10px; padding: 7px 0; border: 0; }.managed-order-table td::before { content: attr(data-label); color: #64748b; font-size: 11px; font-weight: 800; text-transform: uppercase; }.managed-order-actions { min-width: 0; }.managed-pagination { flex-wrap: wrap; justify-content: space-between; }.managed-pagination > div { width: 100%; justify-content: space-between; }
   .managed-detail-meta { grid-template-columns: 1fr 1fr; }.managed-detail-columns { grid-template-columns: 1fr; }.managed-items > div { grid-template-columns: 1fr auto; }.managed-items > div > strong { grid-column: 2; }
 }
+@media (max-width: 480px) { .order-filter-control-grid { grid-template-columns: 1fr; } }

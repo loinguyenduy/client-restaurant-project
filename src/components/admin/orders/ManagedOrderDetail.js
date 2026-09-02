@@ -36,10 +36,12 @@ const ManagedOrderDetail = ({ orderId, onClose }) => {
       timerRef.current = setTimeout(loadOrder, 200);
     };
     socket.on("order:status_changed", refreshMatching);
+    socket.on("order:items_added", refreshMatching);
     socket.on("payment:status_changed", refreshMatching);
     return () => {
       clearTimeout(timerRef.current);
       socket.off("order:status_changed", refreshMatching);
+      socket.off("order:items_added", refreshMatching);
       socket.off("payment:status_changed", refreshMatching);
     };
   }, [loadOrder, orderId]);
@@ -51,7 +53,7 @@ const ManagedOrderDetail = ({ orderId, onClose }) => {
         {loading ? <div className="detail-state">Loading order detail...</div> : error ? <div className="detail-state error"><p>{error}</p><button type="button" onClick={loadOrder}><RefreshCw size={15} /> Retry</button></div> : order && <>
           <div className="managed-detail-meta"><div><span>Fulfillment</span><strong>{getFulfillmentLabel(order)}</strong></div><div><span>Source</span><strong>{order.source ? formatStatus(order.source) : "Legacy / unknown"}</strong></div><div><span>Created</span><strong>{formatDateTime(order.createdAt)}</strong></div><div><span>Status</span><strong>{formatStatus(order.order_status)}</strong></div></div>
           <div className="managed-detail-columns">
-            <section><h3>Customer and payment</h3><dl><div><dt>Customer</dt><dd>{order.contact_name || order.User?.full_name || "Legacy / unknown"}</dd></div><div><dt>Phone</dt><dd>{order.phone_receiver || order.User?.phone_number || "—"}</dd></div>{order.Table && <div><dt>Table</dt><dd>{order.Table.table_number}</dd></div>}<div><dt>Payment</dt><dd>{order.payment_method ? formatStatus(order.payment_method) : "Legacy / unknown"} · {formatStatus(order.payment_status)}</dd></div>{order.transaction_id && <div><dt>Transaction</dt><dd className="break-value">{order.transaction_id}</dd></div>}</dl>{order.note && <div className="managed-note"><strong>Note</strong><p>{order.note}</p></div>}</section>
+            <section><h3>Customer and payment</h3><dl>{(order.contact_name || (order.source !== "pos" && order.User?.full_name)) && <div><dt>Customer</dt><dd>{order.contact_name || order.User.full_name}</dd></div>}<div><dt>Phone</dt><dd>{order.phone_receiver || (order.source !== "pos" && order.User?.phone_number) || "—"}</dd></div>{order.Table && <div><dt>Table</dt><dd>{order.Table.table_number}</dd></div>}{order.guest_count && <div><dt>Guests</dt><dd>{order.guest_count}</dd></div>}<div><dt>Session</dt><dd>{order.reservation_id ? `Reservation #${order.reservation_id.slice(0, 8).toUpperCase()}` : order.fulfillment_type === "dine_in" ? "Walk-in" : "—"}</dd></div><div><dt>Payment</dt><dd>{order.payment_method ? formatStatus(order.payment_method) : order.fulfillment_type === "dine_in" ? "Not selected" : "Legacy / unknown"} · {formatStatus(order.payment_status)}</dd></div>{order.transaction_id && <div><dt>Transaction</dt><dd className="break-value">{order.transaction_id}</dd></div>}</dl>{order.note && <div className="managed-note"><strong>Note</strong><p>{order.note}</p></div>}</section>
             <section><h3>Status history</h3>{order.estimated_ready_at && <div className="managed-eta"><Clock3 size={16} /> ETA {formatDateTime(order.estimated_ready_at)}</div>}<OrderStatusTimeline order={order} /></section>
           </div>
           <section className="managed-items"><h3>Items</h3>{(order.OrderItems || []).map((item) => <div key={item.id}><span><strong>{item.quantity}×</strong> {item.Product?.name || "Legacy dish"}</span><span>{formatCurrency(item.price)} each</span><strong>{formatCurrency(Number(item.price) * item.quantity)}</strong></div>)}</section>

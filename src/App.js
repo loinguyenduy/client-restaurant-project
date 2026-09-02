@@ -30,6 +30,9 @@ import AttendanceLogs from "./components/admin/AttendanceLogs.js";
 import ManageTables from "./components/admin/ManageTables.js";
 import PosTerminal from "./components/admin/PosTerminal.js";
 import KitchenDisplay from "./components/admin/KitchenDisplay.js";
+import Inventory from "./components/admin/Inventory.js";
+import ReviewsPage from "./components/review/ReviewsPage.js";
+import ManageReviews from "./components/admin/ManageReviews.js";
 
 import PrivateRoute from "./routes/PrivateRoute.js";
 import GuestRoute from "./routes/GuestRoute.js";
@@ -152,6 +155,7 @@ function App() {
           <Route path="/" element={<MainLayout />}>
             <Route index element={<HomePage />} />
             <Route path="menu" element={<Menu />} />
+            <Route path="reviews" element={<ReviewsPage />} />
             <Route path="reservation" element={<PrivateRoute><ReservationPage /></PrivateRoute>} />
             <Route path="my-reservations" element={<PrivateRoute><MyReservations /></PrivateRoute>} />
             <Route path="profile" element={<PrivateRoute><ProfileLayout /></PrivateRoute>} />
@@ -160,7 +164,8 @@ function App() {
             <Route path="payment-cancel" element={<PrivateRoute><PaymentCancel /></PrivateRoute>} />
             <Route path="my-orders" element={<PrivateRoute><MyOrders /></PrivateRoute>} />
             <Route path="my-orders/:id" element={<PrivateRoute><OrderDetail /></PrivateRoute>} />
-            <Route path="invoice" element={<PrivateRoute><Invoice /></PrivateRoute>} />
+            <Route path="my-orders/:id/invoice" element={<PrivateRoute><Invoice /></PrivateRoute>} />
+            <Route path="invoice" element={<Navigate to="/my-orders" replace />} />
           </Route>
 
           <Route
@@ -176,6 +181,8 @@ function App() {
             <Route path="tables" element={<ManageTables />} />
             <Route path="attendance-logs" element={<AttendanceLogs />} />
             <Route path="menu" element={<ManageMenu />} />
+            <Route path="inventory" element={<Inventory />} />
+            <Route path="reviews" element={<ManageReviews />} />
             <Route path="users" element={<AccountManagement />} />
           </Route>
 
@@ -189,7 +196,7 @@ function App() {
             <Route path="reservations" element={<ManageReservations />} />
             <Route path="pos" element={<PosTerminal />} />
             <Route path="attendance" element={<Attendance />} />
-            <Route path="tables" element={<ManageTables />} />
+            <Route path="tables" element={<Navigate to="/staff/pos" replace />} />
           </Route>
         </Routes>
       </BrowserRouter>

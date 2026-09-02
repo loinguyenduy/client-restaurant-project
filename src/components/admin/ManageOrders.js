@@ -53,12 +53,14 @@ const ManageOrders = () => {
     };
     socket.on("order:new", queueRefresh);
     socket.on("order:status_changed", queueRefresh);
+    socket.on("order:items_added", queueRefresh);
     socket.on("payment:status_changed", queueRefresh);
     socket.on("connect", refreshOnReconnect);
     return () => {
       clearTimeout(socketTimerRef.current);
       socket.off("order:new", queueRefresh);
       socket.off("order:status_changed", queueRefresh);
+      socket.off("order:items_added", queueRefresh);
       socket.off("payment:status_changed", queueRefresh);
       socket.off("connect", refreshOnReconnect);
     };
@@ -78,7 +80,8 @@ const ManageOrders = () => {
     } finally { setBusyOrderId(null); }
   };
 
-  const canCancel = (order) => ["pending", "pending_payment", "confirmed", "preparing", "processing"].includes(order.order_status);
+  const isExplicitDineIn = (order) => order.fulfillment_type === "dine_in" && order.source === "pos";
+  const canCancel = (order) => isExplicitDineIn(order) ? order.order_status === "confirmed" : ["pending", "pending_payment", "confirmed", "preparing", "processing"].includes(order.order_status);
   const orders = data.orders || [];
 
   return <main className="managed-orders-page">
@@ -94,7 +97,7 @@ const ManageOrders = () => {
           <td data-label="Total"><strong>{formatCurrency(order.final_amount)}</strong></td>
           <td data-label="Payment"><strong>{order.payment_method ? (order.payment_method === "card" ? "Legacy Card" : formatStatus(order.payment_method)) : "Legacy / unknown"}</strong><small className={`payment-${order.payment_status}`}>{formatStatus(order.payment_status)}</small></td>
           <td data-label="Status"><span className={`managed-status ${order.order_status}`}>{formatStatus(order.order_status)}</span></td>
-          <td data-label="Actions"><div className="managed-order-actions">{order.order_status === "ready" && <button type="button" className="complete" disabled={busyOrderId === order.id} onClick={() => updateStatus(order, "completed")}>{order.fulfillment_type === "takeaway" ? "Complete Pickup" : "Complete Order"}</button>}{canCancel(order) && <button type="button" className="cancel" disabled={busyOrderId === order.id} onClick={() => updateStatus(order, "cancelled")}>Cancel</button>}<button type="button" className="view" onClick={() => setSelectedOrderId(order.id)} aria-label={`View order ${order.id}`}><Eye size={17} /> View</button></div></td>
+          <td data-label="Actions"><div className="managed-order-actions">{order.order_status === "ready" && !isExplicitDineIn(order) && <button type="button" className="complete" disabled={busyOrderId === order.id} onClick={() => updateStatus(order, "completed")}>{order.fulfillment_type === "takeaway" ? "Complete Pickup" : "Complete Order"}</button>}{canCancel(order) && <button type="button" className="cancel" disabled={busyOrderId === order.id} onClick={() => updateStatus(order, "cancelled")}>Cancel</button>}<button type="button" className="view" onClick={() => setSelectedOrderId(order.id)} aria-label={`View order ${order.id}`}><Eye size={17} /> View</button></div></td>
         </tr>)}
       </tbody></table></div>}
       <footer className="managed-pagination"><span>{data.totalRows || 0} orders</span><label>Rows <select value={filters.limit} onChange={(event) => setFilters({ ...filters, limit: Number(event.target.value), page: 1 })}><option value="10">10</option><option value="20">20</option><option value="50">50</option></select></label><div><button type="button" disabled={filters.page <= 1 || isLoading} onClick={() => setFilters({ ...filters, page: filters.page - 1 })}>Previous</button><span>Page {filters.page} of {Math.max(data.totalPages || 1, 1)}</span><button type="button" disabled={filters.page >= (data.totalPages || 1) || isLoading} onClick={() => setFilters({ ...filters, page: filters.page + 1 })}>Next</button></div></footer>

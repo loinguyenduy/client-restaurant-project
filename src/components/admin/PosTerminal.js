@@ -1,341 +1,107 @@
-import React, { useEffect, useState } from "react";
-import {
-  Search,
-  Trash2,
-  CreditCard,
-  Banknote,
-  Loader,
-  ExternalLink,
-} from "lucide-react";
-import {
-  getAllProductsAdminApi,
-  getAllTablesApi,
-  createPosOrderApi,
-} from "../../services/adminService";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { RefreshCw } from "lucide-react";
 import { toast } from "react-toastify";
+import { useSearchParams } from "react-router-dom";
+import { getAllProductsAdminApi, getPosTablesApi } from "../../services/adminService";
+import { getSocket } from "../../services/socketService";
+import PosOrderingWorkspace from "./pos/PosOrderingWorkspace";
+import PosTableOverview from "./pos/PosTableOverview";
+import TableCheckoutModal from "./pos/TableCheckoutModal";
 import "./PosTerminal.scss";
-import formatCurrency from "../../utils/formatCurrency";
+
+const makeSelection = (table) => ({
+  key: `${table.id}:${table.active_order?.id || table.seated_reservation?.id || "walkin"}`,
+  table,
+  order: table.active_order || null,
+  mode: table.active_order ? "add" : "new",
+});
 
 const PosTerminal = () => {
-  const [products, setProducts] = useState([]);
+  const [searchParams] = useSearchParams();
   const [tables, setTables] = useState([]);
-  const [cart, setCart] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedTable, setSelectedTable] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("cash");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [selection, setSelection] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [checkoutOrderId, setCheckoutOrderId] = useState("");
+  const contextResolved = useRef(false);
+  const socketTimer = useRef();
 
-  const [waitingPayos, setWaitingPayos] = useState({
-    isWaiting: false,
-    url: "",
-  });
-
-  useEffect(() => {
-    fetchData();
+  const loadTables = useCallback(async ({ quiet = false } = {}) => {
+    if (!quiet) setLoading(true);
+    try {
+      const response = await getPosTablesApi();
+      if (response?.EC !== 0 || !Array.isArray(response.DT)) throw new Error(response?.EM || "Unable to load POS tables.");
+      const nextTables = response.DT;
+      setTables(nextTables);
+      setSelection((current) => {
+        if (!current) return null;
+        const refreshed = nextTables.find((table) => table.id === current.table.id);
+        return refreshed ? makeSelection(refreshed) : null;
+      });
+      setError("");
+      return nextTables;
+    } catch (loadError) {
+      setError(loadError?.EM || loadError?.message || "Unable to load POS tables.");
+      return [];
+    } finally {
+      if (!quiet) setLoading(false);
+    }
   }, []);
 
-  const fetchData = async () => {
+  const loadProducts = useCallback(async () => {
     try {
-      const [prodRes, tableRes] = await Promise.all([
-        getAllProductsAdminApi("all", 1, 100),
-        getAllTablesApi(),
-      ]);
-      if (prodRes.EC === 0) setProducts(prodRes.DT.products);
-      if (tableRes.EC === 0)
-        setTables(tableRes.DT.filter((t) => t.status === "available"));
-    } catch (e) {
-      toast.error("Error loading POS data");
+      const response = await getAllProductsAdminApi("all", 1, 100);
+      if (response?.EC !== 0) throw new Error(response?.EM);
+      setProducts(response.DT?.products || []);
+    } catch (loadError) {
+      toast.error(loadError?.EM || loadError?.message || "Menu items could not be loaded.");
     }
-  };
+  }, []);
 
-  const addToCart = (product) => {
-    if (!product.is_available || product.stock_quantity <= 0) return toast.warning("This dish is unavailable.");
-    const existing = cart.find((item) => item.product_id === product.id);
-    if ((existing?.quantity || 0) >= product.stock_quantity) return toast.warning(`Only ${product.stock_quantity} are available.`);
-    if (existing) {
-      setCart(
-        cart.map((item) =>
-          item.product_id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item,
-        ),
-      );
-    } else {
-      setCart([
-        ...cart,
-        {
-          product_id: product.id,
-          name: product.name,
-          price: product.price,
-          quantity: 1,
-        },
-      ]);
+  useEffect(() => { Promise.all([loadTables(), loadProducts()]); }, [loadProducts, loadTables]);
+  useEffect(() => {
+    if (contextResolved.current || loading || tables.length === 0) return;
+    contextResolved.current = true;
+    const tableId = searchParams.get("tableId");
+    const reservationId = searchParams.get("reservationId");
+    if (!tableId) return;
+    const table = tables.find((item) => item.id === tableId);
+    const reservationMatches = !reservationId || table?.seated_reservation?.id === reservationId || table?.active_order?.reservation_id === reservationId;
+    if (!table || !reservationMatches) {
+      toast.warning("The requested table session is no longer available. Select a current table session.");
+      return;
     }
-  };
+    if (table.active_order || table.can_start_reservation_order || table.can_start_walk_in) setSelection(makeSelection(table));
+  }, [loading, searchParams, tables]);
 
-  const removeFromCart = (id) =>
-    setCart(cart.filter((item) => item.product_id !== id));
-
-  const calculateTotal = () => {
-    const subtotal = cart.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0,
-    );
-    const tax = Math.round(subtotal * 0.08);
-    return { subtotal, tax, final: subtotal + tax };
-  };
-
-  const handlePlaceOrder = async () => {
-    if (!selectedTable) return toast.warning("Please select a table!");
-    if (cart.length === 0) return toast.warning("Cart is empty!");
-
-    setIsSubmitting(true);
-    const payload = {
-      table_id: selectedTable,
-      payment_method: paymentMethod,
-      items: cart.map((i) => ({
-        product_id: i.product_id,
-        quantity: i.quantity,
-      })),
-      // ÉP PAYOS QUAY VỀ TRANG POS TERMINAL THAY VÌ TRANG CỦA CUSTOMER
+  useEffect(() => {
+    const socket = getSocket();
+    const refresh = () => {
+      clearTimeout(socketTimer.current);
+      socketTimer.current = setTimeout(() => { loadTables({ quiet: true }); loadProducts(); }, 250);
     };
+    ["table:status_changed", "reservation:assigned", "reservation:status_changed", "order:new", "order:items_added", "order:status_changed", "product:availability_changed"].forEach((event) => socket.on(event, refresh));
+    socket.on("connect", refresh);
+    return () => {
+      clearTimeout(socketTimer.current);
+      ["table:status_changed", "reservation:assigned", "reservation:status_changed", "order:new", "order:items_added", "order:status_changed", "product:availability_changed"].forEach((event) => socket.off(event, refresh));
+      socket.off("connect", refresh);
+    };
+  }, [loadProducts, loadTables]);
 
-    try {
-      const res = await createPosOrderApi(payload);
-      if (res && res.EC === 0) {
-        if (paymentMethod === "payos") {
-          // Mở thẳng tab mới và hiện thông báo chờ
-          if (!res.DT.checkoutUrl) {
-            toast.info("Order saved, but the PayOS link is unavailable.");
-            resetPOS();
-            return;
-          }
-          window.open(res.DT.checkoutUrl, "_blank");
-          setWaitingPayos({ isWaiting: true, url: res.DT.checkoutUrl });
-        } else {
-          toast.success("Order placed successfully (Cash)!");
-          resetPOS();
-        }
-      } else toast.error(res.EM);
-    } catch (e) {
-      toast.error("Server error");
-    }
-    setIsSubmitting(false);
+  const selectTable = (table) => {
+    if (!table.active_order && !table.can_start_reservation_order && !table.can_start_walk_in) return;
+    setSelection(makeSelection(table));
   };
 
-  const resetPOS = () => {
-    setCart([]);
-    setSelectedTable("");
-    setWaitingPayos({ isWaiting: false, url: "" });
-    fetchData();
-  };
+  const refreshAll = async () => { await Promise.all([loadTables(), loadProducts()]); };
 
-  const filteredProducts = products.filter((p) =>
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
-
-  return (
-    <div className="pos-container">
-      {/* CỘT TRÁI: MENU */}
-      <div className="pos-menu-section">
-        <div className="search-bar">
-          <Search size={18} />
-          <input
-            type="text"
-            placeholder="Search dishes..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        <div className="products-grid">
-          {filteredProducts.map((prod) => (
-            <div
-              className="pos-product-card"
-              key={prod.id}
-              onClick={() => addToCart(prod)}
-            >
-              <div className="img-wrapper">
-                <img
-                  src={prod.image_url || "https://via.placeholder.com/150"}
-                  alt=""
-                />
-              </div>
-              <div className="info">
-                <h4>{prod.name}</h4>
-                <span>{formatCurrency(prod.price)}</span>
-                <div className="stock">Stock: {prod.stock_quantity ?? 0}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* CỘT PHẢI: GIỎ HÀNG & THANH TOÁN */}
-      <div className="pos-cart-section">
-        <div className="cart-header">
-          <h3>Current Order</h3>
-          <select
-            value={selectedTable}
-            onChange={(e) => setSelectedTable(e.target.value)}
-          >
-            <option value="">Select Table</option>
-            {tables.map((t) => (
-              <option key={t.id} value={t.id}>
-                Table {t.table_number}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="cart-items-list">
-          {cart.map((item) => (
-            <div className="cart-item" key={item.product_id}>
-              <div className="item-info">
-                <span className="qty">x{item.quantity}</span>
-                <span className="name">{item.name}</span>
-              </div>
-              <div className="item-price">
-                <span>{formatCurrency(item.price * item.quantity)}</span>
-                <button onClick={() => removeFromCart(item.product_id)}>
-                  <Trash2 size={14} />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="cart-summary">
-          <div className="summary-line">
-            <span>Subtotal</span>
-            <span>{formatCurrency(calculateTotal().subtotal)}</span>
-          </div>
-          <div className="summary-line">
-            <span>Tax (8%)</span>
-            <span>{formatCurrency(calculateTotal().tax)}</span>
-          </div>
-          <div className="total-line">
-            <span>Total</span>
-            <span>{formatCurrency(calculateTotal().final)}</span>
-          </div>
-        </div>
-
-        <div className="payment-methods">
-          <button
-            className={paymentMethod === "cash" ? "active" : ""}
-            onClick={() => setPaymentMethod("cash")}
-          >
-            <Banknote size={18} /> Cash
-          </button>
-          <button
-            className={paymentMethod === "payos" ? "active" : ""}
-            onClick={() => setPaymentMethod("payos")}
-          >
-            <CreditCard size={18} /> PayOS
-          </button>
-        </div>
-
-        <button
-          className="btn-place-order"
-          onClick={handlePlaceOrder}
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? <Loader className="spin" /> : "Place Order"}
-        </button>
-      </div>
-
-      {/* MODAL CHỜ THANH TOÁN PAYOS */}
-      {waitingPayos.isWaiting && (
-        <div className="qr-modal-overlay">
-          <div
-            className="qr-modal"
-            style={{
-              maxWidth: "450px",
-              background: "white",
-              padding: "32px",
-              borderRadius: "16px",
-              textAlign: "center",
-            }}
-          >
-            <h3>Awaiting PayOS Payment</h3>
-            <p style={{ color: "#64748B", marginBottom: "20px" }}>
-              Table:{" "}
-              <strong>
-                {tables.find((t) => t.id === selectedTable)?.table_number}
-              </strong>
-            </p>
-
-            <div
-              style={{
-                background: "#F8FAFC",
-                padding: "24px",
-                borderRadius: "12px",
-                marginBottom: "24px",
-              }}
-            >
-              <ExternalLink
-                size={40}
-                color="#2563EB"
-                style={{ marginBottom: "12px" }}
-              />
-              <p
-                style={{
-                  margin: "0 0 16px 0",
-                  fontSize: "14px",
-                  color: "#334155",
-                }}
-              >
-                A new tab has been opened for the payment gateway.
-              </p>
-              <button
-                onClick={() => window.open(waitingPayos.url, "_blank")}
-                style={{
-                  background: "#DBEAFE",
-                  color: "#1D4ED8",
-                  border: "none",
-                  padding: "10px 20px",
-                  borderRadius: "8px",
-                  cursor: "pointer",
-                  fontWeight: "600",
-                  width: "100%",
-                }}
-              >
-                Re-open Payment Link
-              </button>
-            </div>
-
-            <p
-              className="total-amount"
-              style={{
-                fontSize: "24px",
-                fontWeight: "800",
-                color: "#0F172A",
-                marginBottom: "24px",
-              }}
-            >
-              Total: {formatCurrency(calculateTotal().final)}
-            </p>
-            <div className="modal-actions">
-              <button
-                onClick={resetPOS}
-                style={{
-                  width: "100%",
-                  padding: "12px",
-                  background: "#16A34A",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "8px",
-                  fontWeight: "700",
-                  cursor: "pointer",
-                }}
-              >
-                Close / Done
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+  return <main className="table-first-pos">
+    <header className="pos-page-header"><div><span>Restaurant operations</span><h1>POS / Tables</h1><p>Select a live table session, then send food to the kitchen. Payment happens at Checkout Table.</p></div><button type="button" onClick={refreshAll} disabled={loading}><RefreshCw size={16} className={loading ? "spin" : ""} /> Refresh</button></header>
+    {selection ? <PosOrderingWorkspace selection={selection} products={products} onClose={() => setSelection(null)} onCheckout={setCheckoutOrderId} onSuccess={async () => { setSelection(null); await refreshAll(); }} /> : <PosTableOverview tables={tables} loading={loading} error={error} selectedTableId="" onSelect={selectTable} onRefresh={refreshAll} />}
+    {checkoutOrderId && <TableCheckoutModal orderId={checkoutOrderId} onClose={() => setCheckoutOrderId("")} onCompleted={async () => { setCheckoutOrderId(""); setSelection(null); await refreshAll(); }} />}
+  </main>;
 };
 
 export default PosTerminal;

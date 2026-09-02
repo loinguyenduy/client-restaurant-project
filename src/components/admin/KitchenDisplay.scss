@@ -25,6 +25,8 @@
   .kitchen-card > header span { color: #a7791d; font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
   .kitchen-card h3 { margin: 3px 0 0; font-size: 18px; }
   .kitchen-card time { display: inline-flex; align-items: center; gap: 4px; color: #64748b; font-size: 12px; font-weight: 700; }
+  .kitchen-session-context { margin-top: 9px; color: #475569; font-size: 12px; font-weight: 700; }
+  .new-items-badge { display: inline-flex; margin-top: 8px; padding: 4px 8px; border-radius: 999px; background: #fee2e2; color: #b91c1c; font-size: 10px; font-weight: 900; text-transform: uppercase; }
   .kitchen-card ul { display: grid; gap: 8px; margin: 15px 0; padding: 13px 0; border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9; list-style: none; }
   .kitchen-card li { display: flex; gap: 9px; line-height: 1.35; }
   .kitchen-card li strong { min-width: 28px; color: #a16207; }

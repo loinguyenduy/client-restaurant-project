@@ -47,8 +47,16 @@
   .card-actions button { display: inline-flex; align-items: center; gap: 6px; padding: 9px 13px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; color: #334155; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
   .card-actions .primary-action { border-color: var(--primary-navy); background: var(--primary-navy); color: #fff; }
   .card-actions .danger-action { border-color: #fecaca; color: #b91c1c; }
+  .card-actions .review-action { border-color: #d7ba78; color: #795612; }
   .card-actions button:disabled { opacity: .55; cursor: not-allowed; }
 }
+
+.order-review-modal-overlay { position: fixed; inset: 0; z-index: 1450; display: grid; place-items: center; padding: 20px; background: rgba(15, 32, 55, .7); }
+.order-review-modal { width: min(520px, 100%); max-height: 92vh; overflow-y: auto; padding: 22px; border-radius: 10px; background: #fff; box-shadow: 0 20px 55px rgba(15, 23, 42, .24); }
+.order-review-modal > header { display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0; }
+.order-review-modal > header span { color: #a7791d; font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.order-review-modal > header h2 { margin: 4px 0 0; color: var(--primary-navy); font: 700 21px Georgia, serif; }
+.order-review-modal > header button { display: grid; place-items: center; padding: 4px; border: 0; background: none; color: #64748b; cursor: pointer; }
 
 @media (max-width: 720px) {
   .my-orders-container {
@@ -57,6 +65,12 @@
     .card-body { grid-template-columns: 1fr; }
     .order-facts { padding: 16px 0 0; border-left: 0; border-top: 1px solid #e2e8f0; }
     .card-actions { justify-content: stretch; padding: 14px 18px; }
-    .card-actions button { flex: 1 1 140px; justify-content: center; }
+    .card-actions button { flex: 1 1 180px; justify-content: center; }
   }
+}
+
+@media (max-width: 480px) {
+  .my-orders-container .card-actions button { flex-basis: 100%; width: 100%; }
+  .order-review-modal-overlay { align-items: end; padding: 0; }
+  .order-review-modal { width: 100%; max-height: 94vh; padding: 19px 16px; border-radius: 10px 10px 0 0; }
 }

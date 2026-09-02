@@ -12,6 +12,8 @@ import {
   Table,
   UserCheck,
   Users,
+  Boxes,
+  Star,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { doLogoutSuccess } from "../../redux/actions/authAction";
@@ -61,11 +63,9 @@ const AdminSidebar = () => {
           <CalendarDays size={18} /> Reservations
         </NavLink>
         <NavLink to={`${basePath}/pos`} className={navClass}>
-          <MonitorSmartphone size={18} /> POS Terminal
+          <MonitorSmartphone size={18} /> POS / Tables
         </NavLink>
-        <NavLink to={`${basePath}/tables`} className={navClass}>
-          <Table size={18} /> Table Map
-        </NavLink>
+        {isAdmin && <NavLink to={`${basePath}/tables`} className={navClass}><Table size={18} /> Manage Tables</NavLink>}
 
         {!isAdmin && (
           <NavLink to={`${basePath}/attendance`} className={navClass}>
@@ -80,6 +80,12 @@ const AdminSidebar = () => {
             </NavLink>
             <NavLink to={`${basePath}/menu`} className={navClass}>
               <MenuIcon size={18} /> Menu
+            </NavLink>
+            <NavLink to={`${basePath}/inventory`} className={navClass}>
+              <Boxes size={18} /> Inventory
+            </NavLink>
+            <NavLink to={`${basePath}/reviews`} className={navClass}>
+              <Star size={18} /> Reviews
             </NavLink>
             <NavLink to={`${basePath}/users`} className={navClass}>
               <Users size={18} /> Account Management

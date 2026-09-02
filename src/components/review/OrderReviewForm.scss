@@ -1,0 +1,22 @@
+.review-stars { display: inline-flex; gap: 2px; color: #b78627; vertical-align: middle; }
+.order-review-form fieldset { margin: 0 0 16px; padding: 0; border: 0; }
+.order-review-form legend, .order-review-form > label { color: #334155; font-size: 13px; font-weight: 800; }
+.review-rating-input { display: flex; gap: 3px; margin-top: 7px; }
+.review-rating-input button { display: grid; place-items: center; padding: 2px; border: 0; background: transparent; color: #cbd5e1; cursor: pointer; }
+.review-rating-input button.selected { color: #b78627; }
+.review-rating-input button:focus-visible { outline: 2px solid #0f2747; outline-offset: 2px; }
+.order-review-form > label { display: grid; gap: 7px; }
+.order-review-form textarea { width: 100%; min-height: 105px; padding: 11px 12px; border: 1px solid #cbd5e1; border-radius: 6px; color: #1e293b; font: inherit; line-height: 1.5; resize: vertical; box-sizing: border-box; }
+.order-review-form label > small { color: #788396; font-weight: 500; text-align: right; }
+.review-moderation-note, .review-form-error { margin: 12px 0 0; padding: 10px 12px; border-radius: 6px; font-size: 13px; }
+.review-moderation-note { background: #fff7ed; color: #9a5b08; }
+.review-form-error { background: #fff1f2; color: #a12727; }
+.review-form-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 17px; }
+.review-form-actions button { padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; color: #334155; font: inherit; font-weight: 800; cursor: pointer; }
+.review-form-actions .review-submit { border-color: #0f2747; background: #0f2747; color: #fff; }
+.review-form-actions button:disabled { opacity: .55; cursor: wait; }
+
+@media (max-width: 480px) {
+  .review-form-actions { display: grid; grid-template-columns: 1fr; }
+  .review-form-actions button { width: 100%; }
+}

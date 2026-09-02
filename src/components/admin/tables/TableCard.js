@@ -10,8 +10,9 @@ const statusLabel = (status) => {
 
 const TableCard = ({ table, isAdmin, busy, onStatus, onEdit, onDelete }) => {
   const activeOrder = table.active_order;
+  const seatedReservation = table.seated_reservation;
   const drifted = activeOrder && table.status !== "occupied";
-  const orphanOccupied = table.status === "occupied" && !activeOrder;
+  const orphanOccupied = table.status === "occupied" && !activeOrder && !seatedReservation;
 
   return (
     <article className={`table-map-card ${table.status} ${drifted ? "drifted" : ""}`}>
@@ -35,6 +36,7 @@ const TableCard = ({ table, isAdmin, busy, onStatus, onEdit, onDelete }) => {
       ) : (
         <div className="table-no-order">No active order</div>
       )}
+      {seatedReservation && <div className="table-active-order seated-session"><Users size={16} /><span><small>Seated reservation</small><strong>{seatedReservation.contact_name || "Reserved guest"} · {seatedReservation.number_of_people} guests</strong></span></div>}
 
       {drifted && (
         <p className="table-warning">Status drift detected: an active order requires this table to be occupied.</p>
@@ -49,12 +51,12 @@ const TableCard = ({ table, isAdmin, busy, onStatus, onEdit, onDelete }) => {
             Repair occupancy
           </button>
         )}
-        {!activeOrder && table.status === "available" && (
+        {!activeOrder && !seatedReservation && table.status === "available" && (
           <button type="button" disabled={busy} onClick={() => onStatus(table, "out_of_service", "Mark this table out of service?")}>
             Mark Out of Service
           </button>
         )}
-        {!activeOrder && table.status === "out_of_service" && (
+        {!activeOrder && !seatedReservation && table.status === "out_of_service" && (
           <button type="button" disabled={busy} onClick={() => onStatus(table, "available")}>
             Return to Service
           </button>
