@@ -111,7 +111,7 @@ const OrderDetail = () => {
         {order.review && !editingReview ? <div className="order-review-content"><ReviewStars value={order.review.rating} size={20} /><p>{order.review.comment}</p><small>{order.review.updatedAt && order.review.updatedAt !== order.review.createdAt ? `Updated ${formatDateTime(order.review.updatedAt)}` : `Submitted ${formatDateTime(order.review.createdAt)}`}</small>{order.review.status === "hidden" && <p className="review-hidden-note">This review is currently hidden by moderation.</p>}</div> : <OrderReviewForm orderId={order.id} review={order.review} onCancel={order.review ? () => setEditingReview(false) : undefined} onSaved={loadOrder} />}
       </section>}
       <div className="detail-actions">
-        <button type="button" onClick={() => navigate(`/my-orders/${order.id}/invoice`)}><ReceiptText size={16} /> View invoice</button>
+        <button type="button" onClick={() => navigate(`/my-orders/${order.id}/invoice`)}><ReceiptText size={16} /> View receipt</button>
         {canManagePayment && <><button type="button" className="pay-action" onClick={payAgain} disabled={isBusy}>Pay with PayOS</button><button type="button" className="cancel-action" onClick={cancelOrder} disabled={isBusy}>Cancel order</button></>}
       </div>
     </main>

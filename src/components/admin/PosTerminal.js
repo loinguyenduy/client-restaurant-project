@@ -2,11 +2,12 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { toast } from "react-toastify";
 import { useSearchParams } from "react-router-dom";
-import { getAllProductsAdminApi, getPosTablesApi } from "../../services/adminService";
+import { getAllProductsAdminApi, getManagedOrderDetailsApi, getPosTablesApi } from "../../services/adminService";
 import { getSocket } from "../../services/socketService";
 import PosOrderingWorkspace from "./pos/PosOrderingWorkspace";
 import PosTableOverview from "./pos/PosTableOverview";
 import TableCheckoutModal from "./pos/TableCheckoutModal";
+import InvoiceModal from "./InvoiceModal";
 import "./PosTerminal.scss";
 
 const makeSelection = (table) => ({
@@ -24,6 +25,7 @@ const PosTerminal = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [checkoutOrderId, setCheckoutOrderId] = useState("");
+  const [invoiceOrder, setInvoiceOrder] = useState(null);
   const contextResolved = useRef(false);
   const socketTimer = useRef();
 
@@ -97,10 +99,35 @@ const PosTerminal = () => {
 
   const refreshAll = async () => { await Promise.all([loadTables(), loadProducts()]); };
 
+  const completeCheckout = async (completedOrder) => {
+    const completedOrderId = completedOrder?.id;
+    setCheckoutOrderId("");
+    setSelection(null);
+    const refreshPromise = refreshAll();
+    if (!completedOrderId) {
+      await refreshPromise;
+      toast.error("Payment completed, but the final invoice could not be identified. Open it from Manage Orders.");
+      return;
+    }
+    try {
+      const response = await getManagedOrderDetailsApi(completedOrderId);
+      if (response?.EC !== 0 || response.DT?.order_status !== "completed") {
+        throw new Error(response?.EM || "The final invoice is not ready yet.");
+      }
+      setInvoiceOrder(response.DT);
+      toast.success(response.DT.payment_method === "cash" ? "Cash payment recorded. Table checkout completed." : "PayOS payment confirmed. Table checkout completed.");
+    } catch (loadError) {
+      toast.error(loadError?.EM || loadError?.message || "Payment completed, but the invoice could not be loaded. Open it from Manage Orders.");
+    } finally {
+      await refreshPromise;
+    }
+  };
+
   return <main className="table-first-pos">
     <header className="pos-page-header"><div><span>Restaurant operations</span><h1>POS / Tables</h1><p>Select a live table session, then send food to the kitchen. Payment happens at Checkout Table.</p></div><button type="button" onClick={refreshAll} disabled={loading}><RefreshCw size={16} className={loading ? "spin" : ""} /> Refresh</button></header>
     {selection ? <PosOrderingWorkspace selection={selection} products={products} onClose={() => setSelection(null)} onCheckout={setCheckoutOrderId} onSuccess={async () => { setSelection(null); await refreshAll(); }} /> : <PosTableOverview tables={tables} loading={loading} error={error} selectedTableId="" onSelect={selectTable} onRefresh={refreshAll} />}
-    {checkoutOrderId && <TableCheckoutModal orderId={checkoutOrderId} onClose={() => setCheckoutOrderId("")} onCompleted={async () => { setCheckoutOrderId(""); setSelection(null); await refreshAll(); }} />}
+    {checkoutOrderId && <TableCheckoutModal orderId={checkoutOrderId} onClose={() => setCheckoutOrderId("")} onCompleted={completeCheckout} />}
+    {!checkoutOrderId && invoiceOrder && <InvoiceModal order={invoiceOrder} onClose={() => setInvoiceOrder(null)} />}
   </main>;
 };
 

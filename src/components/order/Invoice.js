@@ -20,7 +20,7 @@ const Invoice = () => {
       if (response?.EC !== 0) throw new Error(response?.EM);
       setOrder(response.DT);
     } catch (loadError) {
-      setError(loadError?.EM || loadError?.message || "The invoice could not be loaded.");
+      setError(loadError?.EM || loadError?.message || "The receipt could not be loaded.");
     } finally {
       setLoading(false);
     }
@@ -31,7 +31,7 @@ const Invoice = () => {
   return (
     <main className="invoice-page-container">
       <button type="button" className="invoice-back no-print" onClick={() => navigate(`/my-orders/${id}`)}><ArrowLeft size={17} /> Back to order</button>
-      {loading ? <div className="invoice-state">Loading canonical invoice...</div> : error ? <div className="invoice-state error"><p>{error}</p><button type="button" onClick={load}><RefreshCw size={16} /> Retry</button></div> : <InvoiceDocument order={order} />}
+      {loading ? <div className="invoice-state">Loading your order receipt...</div> : error ? <div className="invoice-state error"><p>{error}</p><button type="button" onClick={load}><RefreshCw size={16} /> Retry</button></div> : <InvoiceDocument order={order} variant="receipt" showPrint={false} />}
     </main>
   );
 };

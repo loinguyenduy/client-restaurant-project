@@ -1,6 +1,6 @@
-.modal-overlay { position: fixed; inset: 0; z-index: 1300; display: grid; place-items: center; padding: 20px; background: rgba(15, 32, 55, .72); }
-.invoice-modal-content { position: relative; width: min(880px, 100%); max-height: 94vh; overflow-y: auto; background: #f6f7f9; box-shadow: 0 24px 55px rgba(15, 32, 55, .3); }
+.modal-overlay { position: fixed; inset: 0; z-index: 1300; display: grid; place-items: center; box-sizing: border-box; padding: 20px; background: rgba(15, 32, 55, .72); }
+.invoice-modal-content { position: relative; box-sizing: border-box; width: min(1040px, calc(100vw - 40px)); min-width: 0; max-height: 94vh; overflow-x: hidden; overflow-y: auto; background: #f6f7f9; box-shadow: 0 24px 55px rgba(15, 32, 55, .3); }
 .invoice-modal-content > .close-btn { position: sticky; z-index: 3; top: 12px; float: right; display: grid; place-items: center; width: 36px; height: 36px; margin: 12px 12px -48px 0; border: 1px solid #d4dce5; border-radius: 50%; background: #fff; color: #526074; cursor: pointer; }
-.invoice-modal-content .canonical-invoice-shell { padding: 20px; }
-@media (max-width: 640px) { .modal-overlay { padding: 0; }.invoice-modal-content { max-height: 100vh; }.invoice-modal-content .canonical-invoice-shell { padding: 0; }.invoice-modal-content .canonical-invoice-actions { padding: 12px 54px 0 12px; } }
-@media print { .modal-overlay { position: static; display: block; padding: 0; background: #fff; }.invoice-modal-content { max-height: none; overflow: visible; box-shadow: none; }.invoice-modal-content .canonical-invoice-shell { padding: 0; } }
+.invoice-modal-content .canonical-invoice-shell { box-sizing: border-box; width: 100%; min-width: 0; padding: 20px; }
+@media (max-width: 640px) { .modal-overlay { padding: 0; }.invoice-modal-content { width: 100vw; max-height: 100vh; }.invoice-modal-content .canonical-invoice-shell { padding: 0; }.invoice-modal-content .canonical-invoice-actions { padding: 12px 54px 0 12px; } }
+@media print { .modal-overlay { position: static; display: block; padding: 0; background: #fff; }.invoice-modal-content { width: 100%; max-height: none; overflow: visible; box-shadow: none; }.invoice-modal-content .canonical-invoice-shell { padding: 0; } }

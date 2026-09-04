@@ -42,7 +42,7 @@ const OrderCard = ({ order, busyOrderId, onCancel, onPay, onDetails, onInvoice, 
         {canPay && <button type="button" className="primary-action" disabled={busyOrderId === order.id} onClick={() => onPay(order.id)}>{busyOrderId === order.id ? "Opening PayOS..." : "Pay now"}</button>}
         {canCancel && <button type="button" className="danger-action" disabled={busyOrderId === order.id} onClick={() => onCancel(order.id)}>Cancel order</button>}
         <button type="button" onClick={() => onDetails(order.id)}><Eye size={16} /> {isActiveOrder(order) ? "Track order" : "View detail"}</button>
-        <button type="button" onClick={() => onInvoice(order)}><ReceiptText size={16} /> Invoice</button>
+        <button type="button" onClick={() => onInvoice(order)}><ReceiptText size={16} /> Receipt</button>
         {order.order_status === "completed" && <button type="button" className="review-action" onClick={() => onReview(order)}><MessageSquare size={16} /> {order.review ? `Reviewed ${order.review.rating}★ · View / Edit` : "Write Review"}</button>}
       </footer>
     </article>

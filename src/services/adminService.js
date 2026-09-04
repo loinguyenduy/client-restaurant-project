@@ -10,6 +10,7 @@ export const getManagedOrderDetailsApi = (orderId) => axios.get(`/manage/orders/
 export const updateOrderStatusApi = (orderId, status) => {
     return axios.put(`/manage/orders/${orderId}/status`, { status });
 };
+export const updateKitchenBatchStatusApi = (orderId, batchId, status) => axios.put(`/manage/orders/${orderId}/kitchen-batches/${batchId}/status`, { status });
 export const getKitchenOrdersApi = () => axios.get('/manage/orders/kitchen');
 
 export const getAllReservationsAdminApi = (options = {}) => axios.get('/manage/reservations', { params: options });
@@ -77,6 +78,7 @@ export const getAttendanceLogsApi = (page = 1, limit = 20, userId = '') => {
 };
 export const getOwnAttendanceHistoryApi = (params = {}) => axios.get('/attendance/history', { params });
 export const getAttendanceReportLogsApi = (params = {}) => axios.get('/manage/attendance/logs', { params });
+export const getAttendanceOverviewApi = (params = {}) => axios.get('/manage/attendance/overview', { params });
 export const getAttendanceSummaryApi = (params = {}) => axios.get('/manage/attendance/summary', { params });
 
 // --- TABLE MANAGEMENT API ---

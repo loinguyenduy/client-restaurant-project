@@ -46,41 +46,13 @@ const TableCard = ({ table, isAdmin, busy, onStatus, onEdit, onDelete }) => {
       )}
 
       <div className="table-card-actions">
-        {drifted && isAdmin && (
-          <button type="button" className="repair" disabled={busy} onClick={() => onStatus(table, "occupied", "Repair occupancy from the active order?")}>
-            Repair occupancy
-          </button>
-        )}
-        {!activeOrder && !seatedReservation && table.status === "available" && (
-          <button type="button" disabled={busy} onClick={() => onStatus(table, "out_of_service", "Mark this table out of service?")}>
-            Mark Out of Service
-          </button>
-        )}
-        {!activeOrder && !seatedReservation && table.status === "out_of_service" && (
-          <button type="button" disabled={busy} onClick={() => onStatus(table, "available")}>
-            Return to Service
-          </button>
-        )}
-        {isAdmin && orphanOccupied && (
-          <>
-            <button type="button" disabled={busy} onClick={() => onStatus(table, "available", "Release this orphan occupied table?")}>
-              Release orphan
-            </button>
-            <button type="button" disabled={busy} onClick={() => onStatus(table, "out_of_service", "Move this orphan occupied table out of service?")}>
-              Resolve as Out of Service
-            </button>
-          </>
-        )}
-        {isAdmin && table.status === "reserved" && (
-          <>
-            <button type="button" disabled={busy} onClick={() => onStatus(table, "available", "Resolve this legacy reserved table as available?")}>
-              Return to Service
-            </button>
-            <button type="button" disabled={busy} onClick={() => onStatus(table, "out_of_service", "Resolve this legacy reserved table as out of service?")}>
-              Mark Out of Service
-            </button>
-          </>
-        )}
+        <div className="operational-actions">
+          {drifted && isAdmin && <button type="button" className="repair" disabled={busy} onClick={() => onStatus(table, "occupied", "Repair occupancy from the active order?")}>Repair occupancy</button>}
+          {!activeOrder && !seatedReservation && table.status === "available" && <button type="button" disabled={busy} onClick={() => onStatus(table, "out_of_service", "Mark this table out of service?")}>Mark Out of Service</button>}
+          {!activeOrder && !seatedReservation && table.status === "out_of_service" && <button type="button" disabled={busy} onClick={() => onStatus(table, "available")}>Return to Service</button>}
+          {isAdmin && orphanOccupied && <><button type="button" disabled={busy} onClick={() => onStatus(table, "available", "Release this orphan occupied table?")}>Release orphan</button><button type="button" disabled={busy} onClick={() => onStatus(table, "out_of_service", "Move this orphan occupied table out of service?")}>Resolve as Out of Service</button></>}
+          {isAdmin && table.status === "reserved" && <><button type="button" disabled={busy} onClick={() => onStatus(table, "available", "Resolve this legacy reserved table as available?")}>Return to Service</button><button type="button" disabled={busy} onClick={() => onStatus(table, "out_of_service", "Resolve this legacy reserved table as out of service?")}>Mark Out of Service</button></>}
+        </div>
         {isAdmin && (
           <div className="structural-actions">
             <button type="button" onClick={() => onEdit(table)} aria-label={`Edit ${table.table_number}`}>

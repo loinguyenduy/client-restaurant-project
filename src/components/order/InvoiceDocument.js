@@ -24,8 +24,10 @@ const getCompletionDate = (order) => {
   return entry?.createdAt || null;
 };
 
-const InvoiceDocument = ({ order, showPrint = true }) => {
+const InvoiceDocument = ({ order, variant = "invoice", showPrint = true }) => {
   if (!order) return null;
+  const isReceipt = variant === "receipt";
+  const documentTitle = isReceipt ? "Order Receipt" : "Invoice";
   const completionDate = getCompletionDate(order);
   const customerName = String(order.contact_name || "").trim() || null;
   const reservationReference = order.reservation_id || order.Reservation?.id;
@@ -38,9 +40,9 @@ const InvoiceDocument = ({ order, showPrint = true }) => {
           <button type="button" onClick={() => window.print()}><Printer size={17} /> Print Bill</button>
         </div>
       )}
-      <article className="canonical-invoice" aria-label={`Invoice ${order.id}`}>
+      <article className={`canonical-invoice ${isReceipt ? "receipt-document" : "invoice-document"}`} aria-label={`${documentTitle} ${order.id}`}>
         <header className="canonical-invoice-header">
-          <div><p className="eyebrow">ROYAL RESTAURANT</p><h1>Invoice</h1></div>
+          <div><p className="eyebrow">ROYAL RESTAURANT</p><h1>{documentTitle}</h1></div>
           <dl>
             <div><dt>Order</dt><dd>#{String(order.id).slice(0, 8).toUpperCase()}</dd></div>
             <div><dt>Order date</dt><dd>{formatDateTime(order.createdAt)}</dd></div>
