@@ -2,10 +2,10 @@ import axios from "axios";
 import store from "../redux/store.js";
 import { USER_LOGOUT_SUCCESS, FETCH_USER_LOGIN_SUCCESS } from '../redux/actions/authAction';
 import { CLEAR_CART } from '../redux/actions/cartAction';
+import { apiBaseUrl } from "../config/runtimeConfig.js";
 
 const instance = axios.create({
-  baseURL:
-    process.env.REACT_APP_API_URL || "http://localhost:8080/api/v1",
+  baseURL: apiBaseUrl,
   withCredentials: true,
 });
 

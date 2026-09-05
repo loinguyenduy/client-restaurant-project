@@ -1,7 +1,6 @@
 import { io } from "socket.io-client";
+import { socketUrl } from "../config/runtimeConfig.js";
 
-const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:8080/api/v1";
-const socketUrl = process.env.REACT_APP_SOCKET_URL || apiUrl.replace(/\/api\/v1\/?$/, "");
 let socket;
 let currentToken = null;
 
