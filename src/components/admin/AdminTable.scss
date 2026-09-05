@@ -1,0 +1,105 @@
+.admin-page-container {
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #0F172A;
+      margin: 0;
+    }
+    p { margin: 6px 0 0; color: #64748B; }
+    .refresh-button { display: inline-flex; align-items: center; gap: 6px; padding: 9px 13px; border: 1px solid #CBD5E1; border-radius: 6px; background: white; color: #334155; font-weight: 600; cursor: pointer; }
+  }
+
+  .table-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid #E2E8F0;
+    overflow: hidden;
+
+    .table-responsive {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+
+      th {
+        padding: 16px 24px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #64748B;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid #F1F5F9;
+        background-color: #FAFAF9;
+      }
+
+      td {
+        padding: 20px 24px;
+        font-size: 14px;
+        color: #334155;
+        border-bottom: 1px solid #F1F5F9;
+        vertical-align: middle;
+
+        .primary-text { font-weight: 600; color: #0F172A; display: block; margin-bottom: 4px; }
+        .secondary-text { font-size: 13px; color: #64748B; display: block; }
+
+        .status-select {
+          padding: 6px 12px;
+          border-radius: 6px;
+          border: 1px solid #E2E8F0;
+          font-size: 13px;
+          font-weight: 500;
+          cursor: pointer;
+          outline: none;
+          background-color: white;
+
+          &:disabled {
+            background-color: #F1F5F9;
+            cursor: not-allowed;
+            color: #94A3B8;
+          }
+        }
+
+        .payment-paid { color: #15803D; }
+        .payment-failed, .payment-refunded { color: #B91C1C; }
+        .order-action-cell { display: grid; gap: 9px; min-width: 210px; }
+        .managed-status { width: fit-content; padding: 5px 9px; border-radius: 999px; background: #E2E8F0; color: #334155; font-size: 12px; font-weight: 700; }
+        .managed-status.pending, .managed-status.pending_payment { background: #FEF3C7; color: #92400E; }
+        .managed-status.confirmed { background: #DBEAFE; color: #1D4ED8; }
+        .managed-status.preparing, .managed-status.processing { background: #EDE9FE; color: #6D28D9; }
+        .managed-status.ready { background: #DCFCE7; color: #15803D; }
+        .managed-status.cancelled { background: #FEE2E2; color: #B91C1C; }
+        .context-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+        .context-actions button { padding: 7px 9px; border-radius: 5px; background: white; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+        .context-actions button:disabled { opacity: .55; cursor: not-allowed; }
+        .complete-button { border: 1px solid #BBF7D0; color: #15803D; }
+        .cancel-button { border: 1px solid #FECACA; color: #B91C1C; }
+        .context-actions .icon-button { display: grid; place-items: center; padding: 6px; border: 1px solid #CBD5E1; color: #64748B; }
+      }
+
+      tbody tr {
+        transition: background-color 0.2s;
+        &:hover { background-color: #F8FAFC; }
+      }
+    }
+
+    .empty-state {
+      padding: 40px;
+      text-align: center;
+      color: #64748B;
+    }
+  }
+}
+
+@media (max-width: 720px) {
+  .admin-page-container .page-header { flex-direction: column; }
+}

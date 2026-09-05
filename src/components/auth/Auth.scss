@@ -18,9 +18,33 @@
     h2 {
       text-align: center;
       color: var(--primary-navy); /* Tiêu đề màu Navy đậm */
-      margin-bottom: 30px;
+      margin-bottom: 8px;
       font-size: 28px;
       font-weight: 700;
+    }
+
+    .auth-eyebrow {
+      margin: 0 0 8px;
+      color: var(--accent-gold);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .auth-description {
+      margin: 0 0 28px;
+      color: #64748B;
+      font-size: 14px;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
     }
 
     .input-group {
@@ -88,15 +112,23 @@
       color: #64748B;
       font-size: 14.5px;
 
-      span {
+      a {
         color: var(--primary-navy);
-        cursor: pointer;
         font-weight: 600;
 
         &:hover {
           text-decoration: underline;
         }
       }
+    }
+
+    .portal-link {
+      margin-top: 12px;
+      color: #64748B;
+      font-size: 13px;
+      text-align: center;
+
+      a { color: var(--primary-navy); font-weight: 600; }
     }
   }
 }
@@ -110,6 +142,8 @@
       h2 {
         font-size: 24px;
       }
+
+      .form-row { grid-template-columns: 1fr; gap: 0; }
     }
   }
 }

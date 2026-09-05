@@ -3,6 +3,7 @@
     "axios": "^1.13.2",
     "bootstrap": "^5.3.8",
     "lucide-react": "^0.562.0",
+    "qrcode.react": "^4.2.0",
     "react": "^19.0.0",
     "react-bootstrap": "^2.10.10",
     "react-dom": "^19.0.0",
@@ -13,7 +14,9 @@
     "react-toastify": "^11.0.5",
     "redux": "^5.0.1",
     "redux-persist": "^6.0.0",
-    "sass": "^1.97.3"
+    "sass": "^1.97.3",
+    "socket.io-client": "^4.8.3",
+    "sweetalert2": "^11.26.24"
   },
   "scripts": {
     "start": "react-scripts start",

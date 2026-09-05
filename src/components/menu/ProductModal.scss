@@ -1,258 +1,199 @@
-
-.modal-overlay {
+.product-modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(15, 23, 42, 0.75); 
+  inset: 0;
   z-index: 9999;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   padding: 20px;
+  background: rgba(15, 23, 42, 0.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.modal-content {
-  background-color: #fff;
-  border-radius: 12px;
-  width: 100%;
-  max-width: 900px;
+.product-modal-content {
   position: relative;
-  overflow: hidden;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  animation: modalFadeIn 0.3s ease-out forwards;
+  width: min(900px, 100%);
+  max-height: calc(100vh - 40px);
+  overflow: auto;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 25px 50px rgba(15, 23, 42, 0.28);
+  animation: modal-fade-in 0.2s ease-out;
 
   .close-modal-btn {
     position: absolute;
-    top: 15px;
-    right: 15px;
-    background: #fff;
-    border: none;
+    top: 14px;
+    right: 14px;
+    z-index: 2;
+    width: 38px;
+    height: 38px;
+    border: 0;
     border-radius: 50%;
-    width: 36px;
-    height: 36px;
+    background: #fff;
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
+    color: #475569;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.14);
     cursor: pointer;
-    z-index: 10;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    color: #64748b;
-    transition: all 0.2s;
+  }
 
-    &:hover {
-      background: #f1f5f9;
-      color: #ef4444; // Màu đỏ khi hover
+  .modal-body { display: grid; grid-template-columns: 1fr 1fr; }
+
+  .modal-image-container {
+    min-height: 440px;
+    background: #f1f5f9;
+
+    > img,
+    > .product-image-fallback {
+      width: 100%;
+      height: 100%;
+      min-height: 440px;
+      object-fit: cover;
     }
   }
 
-  .modal-body {
+  .product-image-fallback {
     display: flex;
     flex-direction: column;
-    
-    // Trên desktop chia làm 2 cột
-    @media (min-width: 768px) {
-      flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: #94a3b8;
+  }
+
+  .modal-details {
+    padding: 44px 38px 36px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal-category {
+    color: #9a7b1e;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .modal-title {
+    margin: 10px 0 8px;
+    color: var(--primary-navy);
+    font-size: clamp(1.6rem, 4vw, 2rem);
+    line-height: 1.2;
+  }
+
+  .modal-price {
+    margin: 0 0 18px;
+    color: var(--primary-navy);
+    font-size: 1.4rem;
+  }
+
+  .modal-desc {
+    margin: 0 0 24px;
+    color: #64748b;
+    line-height: 1.65;
+  }
+
+  .modal-meta {
+    padding: 15px 0;
+    margin-bottom: 28px;
+    border-top: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: #475569;
+    font-size: 0.9rem;
+
+    svg { color: #9a7b1e; }
+  }
+
+  .modal-stock {
+    font-size: 0.82rem;
+    font-weight: 700;
+
+    &.available { color: #166534; }
+    &.low-stock { color: #92400e; }
+    &.sold-out { color: #991b1b; }
+  }
+
+  .modal-actions {
+    margin-top: auto;
+    display: flex;
+    gap: 12px;
+  }
+
+  .modal-qty {
+    overflow: hidden;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+
+    button {
+      width: 42px;
+      height: 48px;
+      border: 0;
+      background: #fff;
+      color: #0f172a;
+      cursor: pointer;
+
+      &:not(:disabled):hover { background: #f1f5f9; }
+      &:disabled { opacity: 0.4; cursor: not-allowed; }
     }
 
-    .modal-image-container {
-      position: relative;
-      flex: 1; // Chiếm 50%
-      min-height: 300px;
+    span { min-width: 28px; text-align: center; font-weight: 700; }
+  }
 
-      .modal-img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        position: absolute;
-        top: 0; left: 0;
-      }
+  .modal-add-btn {
+    min-height: 48px;
+    padding: 10px 16px;
+    border: 0;
+    border-radius: 6px;
+    background: var(--primary-navy);
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
 
-      .signature-badge {
-        position: absolute;
-        top: 20px;
-        left: 20px;
-        background-color: #ff7b00;
-        color: #fff;
-        font-size: 0.8rem;
-        font-weight: 800;
-        padding: 6px 12px;
-        border-radius: 4px;
-        z-index: 2;
-      }
-    }
-
-    .modal-details {
-      flex: 1; // Chiếm 50%
-      padding: 40px;
-      display: flex;
-      flex-direction: column;
-
-      .modal-category {
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        color: var(--accent-gold);
-        font-weight: 600;
-        margin-bottom: 10px;
-      }
-
-      .modal-title {
-        font-size: 2rem;
-        color: var(--primary-navy);
-        margin: 0 0 10px 0;
-        line-height: 1.2;
-      }
-
-      .modal-price {
-        font-size: 1.5rem;
-        color: var(--primary-navy);
-        margin: 0 0 20px 0;
-      }
-
-      .modal-desc {
-        color: #64748b;
-        line-height: 1.6;
-        margin-bottom: 25px;
-      }
-
-      /* KHU VỰC THÔNG TIN META (Thời gian, Kcal, Đánh giá) */
-      .modal-meta {
-        display: flex;
-        gap: 20px;
-        border-top: 1px solid #f1f5f9;
-        border-bottom: 1px solid #f1f5f9;
-        padding: 15px 0;
-        margin-bottom: 30px;
-
-        .meta-item {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          color: #64748b;
-          font-size: 0.9rem;
-
-          // Sửa màu icon
-          &:nth-child(1) svg { color: #3b82f6; } // Clock xanh lơ
-          &:nth-child(2) svg { color: #ef4444; } // Flame đỏ
-          &:nth-child(3) svg { color: var(--accent-gold); } // Star vàng
-        }
-      }
-
-      /* KHU VỰC THAO TÁC (Tăng giảm & Nút Add to Order dài) */
-      .modal-actions {
-        display: flex;
-        gap: 15px;
-        margin-top: auto; // Đẩy xuống dưới cùng
-
-        .modal-qty {
-          display: flex;
-          align-items: center;
-          border: 1px solid #cbd5e1;
-          border-radius: 6px;
-          
-          button {
-            background: none;
-            border: none;
-            padding: 0 15px;
-            height: 48px;
-            cursor: pointer;
-            color: var(--primary-navy);
-            transition: background 0.2s;
-            &:hover { background: #f1f5f9; }
-          }
-          span {
-            font-weight: 600;
-            width: 30px;
-            text-align: center;
-          }
-        }
-
-        .modal-add-btn {
-          flex: 1;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 10px;
-          background-color: var(--primary-navy);
-          color: #fff;
-          border: none;
-          border-radius: 6px;
-          font-size: 1.1rem;
-          font-weight: 600;
-          cursor: pointer;
-          transition: background-color 0.2s;
-
-          &:hover {
-            background-color: #1e293b;
-          }
-        }
-      }
-    }
+    &:not(:disabled):hover { background: #1e293b; }
+    &:disabled { opacity: 0.55; cursor: not-allowed; }
   }
 }
 
-@keyframes modalFadeIn {
-  from { opacity: 0; transform: translateY(20px); }
+@keyframes modal-fade-in {
+  from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
+@media (max-width: 720px) {
+  .product-modal-content {
+    .modal-body { grid-template-columns: 1fr; }
+    .modal-image-container { min-height: 250px; height: 250px; }
+    .modal-image-container > img,
+    .modal-image-container > .product-image-fallback { min-height: 250px; }
+    .modal-details { padding: 30px 22px 24px; }
+  }
+}
 
-/* =========================================================
-   4. PAGINATION (Giữ nguyên)
-========================================================= */
-.pagination-container {
-  margin-top: 50px;
-  display: flex;
-  justify-content: center;
-
-  .pagination {
-    display: flex;
-    list-style: none;
-    padding: 0;
-    gap: 12px;
-    align-items: center;
-
-    .page-item {
-      .page-link {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 40px;
-        height: 40px;
-        border: 1px solid #e0e0e0;
-        border-radius: 50%;
-        color: #333;
-        transition: all 0.3s ease;
-        cursor: pointer;
-        background-color: white;
-
-        &:hover {
-          border-color: #ffb800;
-          color: #ffb800;
-        }
-      }
-
-      &.active .page-link {
-        background-color: #333;
-        border-color: #333;
-        color: #fff;
-      }
-
-      &.previous,
-      &.next {
-        .page-link {
-          background-color: #f8f9fa;
-          svg { display: block; }
-        }
-
-        &.disabled .page-link {
-          color: #ccc;
-          cursor: not-allowed;
-          opacity: 0.5;
-        }
-      }
-    }
+@media (max-width: 480px) {
+  .product-modal-overlay { padding: 10px; }
+  .product-modal-content {
+    max-height: calc(100vh - 20px);
+    .modal-meta { align-items: flex-start; flex-direction: column; }
+    .modal-actions { flex-direction: column; }
+    .modal-qty { justify-content: space-between; }
+    .modal-add-btn { flex: none; }
   }
 }

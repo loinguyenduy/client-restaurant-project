@@ -34,17 +34,34 @@
         color: #EF4444;
       }
 
+      &.pending {
+        background-color: #fef3c7;
+        color: #b7791f;
+      }
+
       svg {
         width: 40px;
         height: 40px;
       }
     }
 
-    h2 {
+    h1, h2 {
       font-size: 28px;
       color: var(--primary-navy);
       margin-bottom: 12px;
-      font-family: serif;
+      font-family: var(--font-ui);
+    }
+
+    .result-action {
+      width: 100%;
+      padding: 13px 18px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--primary-navy);
+      color: #fff;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
     }
 
     p {

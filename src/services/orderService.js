@@ -10,13 +10,19 @@ const getUserOrdersApi = () => {
     return axios.get("/orders/my-orders");
 };
 
+const getUserOrderDetailsApi = (orderId) => axios.get(`/orders/my-orders/${orderId}`);
+
 // Function to request a new payment link for a pending order
 const rePayOrderApi = (orderId) => {
-    return axios.post("/orders/re-pay", { order_id: orderId });
+    return axios.post(`/orders/${orderId}/re-pay`);
 };
+
+const cancelOrderApi = (orderId) => axios.post(`/orders/${orderId}/cancel`);
 
 export {
     checkoutApi,
+    cancelOrderApi,
+    getUserOrderDetailsApi,
     getUserOrdersApi,
     rePayOrderApi
 };

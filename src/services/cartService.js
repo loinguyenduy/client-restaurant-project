@@ -28,10 +28,15 @@ const syncCartApi = (localCart, token) => {
   );
 };
 
+const validateGuestCartApi = (items) => {
+  return axios.post("/cart/validate", { items });
+};
+
 export {
   addToCartApi,
   getCartApi,
   updateCartItemApi,
   removeCartItemApi,
   syncCartApi,
+  validateGuestCartApi,
 };
