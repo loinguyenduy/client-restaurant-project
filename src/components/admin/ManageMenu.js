@@ -52,7 +52,7 @@ const ManageMenu = () => {
       <div className="page-heading">
         <div>
           <h1>Menu Management</h1>
-          <p>Manage categories, availability, stock, and realistic preparation times.</p>
+          <p>Manage categories, menu details, Homepage features and availability.</p>
         </div>
         <button type="button" className="refresh-button" onClick={fetchData} disabled={isLoading}><RefreshCw size={17} />Refresh</button>
       </div>

@@ -42,7 +42,7 @@ const ProductList = ({ products, isLoading, onEdit, onChanged }) => {
               <div className="dish-img"><ProductImage src={product.image_url} alt={product.name} /></div>
               <div className="dish-info">
                 <div className="top-row">
-                  <h3>{product.name}</h3>
+                  <div className="dish-title"><h3>{product.name}</h3>{product.is_featured && <span className="featured-badge">Featured</span>}</div>
                   <div className="card-actions">
                     <button type="button" onClick={() => onEdit(product)} aria-label={`Edit ${product.name}`}><Edit2 size={15} /></button>
                     <button type="button" onClick={() => deleteProduct(product)} aria-label={`Delete ${product.name}`}><Trash2 size={15} /></button>

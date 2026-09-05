@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { NavLink, Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Menu as MenuIcon, LogOut, User, ClipboardList, Calendar, ChevronDown, LayoutDashboard } from 'lucide-react';
+import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
+import { ShoppingCart, Menu as MenuIcon, LogOut, User, ClipboardList, Calendar, ChevronDown, LayoutDashboard, X } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { doLogoutSuccess } from '../../redux/actions/authAction';
 import { logoutUserApi } from '../../services/authService';
@@ -11,6 +11,7 @@ import { getRoleHome } from '../../utils/roleNavigation';
 
 const Header = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
   
   const { isAuthenticated, account } = useSelector(state => state.auth); 
@@ -19,6 +20,7 @@ const Header = () => {
 
   // State quản lý Dropdown
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const dropdownRef = useRef(null);
 
   // Xử lý click ra ngoài để đóng dropdown
@@ -31,6 +33,44 @@ const Header = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+    setIsDropdownOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!isMobileMenuOpen) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') setIsMobileMenuOpen(false);
+    };
+    const desktopQuery = window.matchMedia('(min-width: 1025px)');
+    const closeAtDesktop = (event) => {
+      if (event.matches) setIsMobileMenuOpen(false);
+    };
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', closeOnEscape);
+    desktopQuery.addEventListener('change', closeAtDesktop);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', closeOnEscape);
+      desktopQuery.removeEventListener('change', closeAtDesktop);
+    };
+  }, [isMobileMenuOpen]);
+
+  const publicLinks = [
+    { to: '/', label: 'Home', end: true },
+    { to: '/menu', label: 'Menu' },
+    { to: '/reservation', label: 'Reservations' },
+    { to: '/reviews', label: 'Reviews' },
+  ];
+
+  const renderPublicLinks = () => publicLinks.map((link) => (
+    <NavLink key={link.to} to={link.to} end={link.end} className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+      {link.label}
+    </NavLink>
+  ));
 
   const handleLogout = async () => {
     try {
@@ -52,23 +92,7 @@ const Header = () => {
           <span className="logo-main">ROYAL RESTAURANT</span>
         </Link>
 
-        <nav className="nav-menu">
-          <NavLink to="/about" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
-            About Us
-          </NavLink>
-          <NavLink to="/menu" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
-            Menu
-          </NavLink>
-          <NavLink to="/reservation" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
-            Reservation
-          </NavLink>
-          <NavLink to="/reviews" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
-            Reviews
-          </NavLink>
-          <NavLink to="/contact" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
-            Contact
-          </NavLink>
-        </nav>
+        <nav className="nav-menu" aria-label="Primary navigation">{renderPublicLinks()}</nav>
 
         <div className="header-actions">
           
@@ -136,11 +160,20 @@ const Header = () => {
             </div>
           )}
 
-          <button className="mobile-menu-btn">
+          <button className="mobile-menu-btn" type="button" aria-label="Open navigation" aria-expanded={isMobileMenuOpen} aria-controls="mobile-navigation" onClick={() => setIsMobileMenuOpen(true)}>
             <MenuIcon size={24} />
           </button>
         </div>
       </div>
+      {isMobileMenuOpen && <button type="button" className="mobile-nav-overlay" aria-label="Close navigation" onClick={() => setIsMobileMenuOpen(false)} />}
+      {isMobileMenuOpen && <aside id="mobile-navigation" className="mobile-nav-drawer open">
+        <div className="mobile-nav-heading">
+          <span>ROYAL RESTAURANT</span>
+          <button type="button" aria-label="Close navigation" onClick={() => setIsMobileMenuOpen(false)}><X size={22} /></button>
+        </div>
+        <nav aria-label="Mobile navigation">{renderPublicLinks()}</nav>
+        {!isAuthenticated && <div className="mobile-auth-links"><Link to="/login">Log In</Link><Link to="/register">Register</Link></div>}
+      </aside>}
     </header>
   );
 };

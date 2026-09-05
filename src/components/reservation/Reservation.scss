@@ -11,7 +11,7 @@
     h1 {
       font-size: 36px;
       color: var(--primary-navy);
-      font-family: serif;
+      font-family: var(--font-ui);
       margin-bottom: 12px;
     }
     p {
@@ -49,7 +49,7 @@
 
     .gold-title {
       color: var(--accent-gold);
-      font-family: serif;
+      font-family: var(--font-ui);
       font-size: 20px;
       margin-top: 0;
       margin-bottom: 24px;
@@ -179,7 +179,7 @@
             align-items: center;
             gap: 8px;
             font-size: 16px;
-            font-family: serif;
+            font-family: var(--font-ui);
             color: var(--primary-navy);
             margin-bottom: 16px;
             color: var(--accent-gold);

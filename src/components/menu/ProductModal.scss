@@ -1,4 +1,4 @@
-.modal-overlay {
+.product-modal-overlay {
   position: fixed;
   inset: 0;
   z-index: 9999;
@@ -9,7 +9,7 @@
   justify-content: center;
 }
 
-.modal-content {
+.product-modal-content {
   position: relative;
   width: min(900px, 100%);
   max-height: calc(100vh - 40px);
@@ -178,7 +178,7 @@
 }
 
 @media (max-width: 720px) {
-  .modal-content {
+  .product-modal-content {
     .modal-body { grid-template-columns: 1fr; }
     .modal-image-container { min-height: 250px; height: 250px; }
     .modal-image-container > img,
@@ -188,8 +188,8 @@
 }
 
 @media (max-width: 480px) {
-  .modal-overlay { padding: 10px; }
-  .modal-content {
+  .product-modal-overlay { padding: 10px; }
+  .product-modal-content {
     max-height: calc(100vh - 20px);
     .modal-meta { align-items: flex-start; flex-direction: column; }
     .modal-actions { flex-direction: column; }

@@ -35,8 +35,8 @@ const ProductModal = ({ product, categories, canOrder, onClose, onAddToCart }) =
   };
 
   return (
-    <div className="modal-overlay" onMouseDown={onClose}>
-      <div className="modal-content" role="dialog" aria-modal="true" aria-labelledby="product-modal-title" onMouseDown={(event) => event.stopPropagation()}>
+    <div className="product-modal-overlay" onMouseDown={onClose}>
+      <div className="product-modal-content" role="dialog" aria-modal="true" aria-labelledby="product-modal-title" onMouseDown={(event) => event.stopPropagation()}>
         <button className="close-modal-btn" onClick={onClose} aria-label="Close product details"><X size={24} /></button>
         <div className="modal-body">
           <div className="modal-image-container">

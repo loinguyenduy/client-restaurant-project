@@ -33,6 +33,8 @@ import KitchenDisplay from "./components/admin/KitchenDisplay.js";
 import Inventory from "./components/admin/Inventory.js";
 import ReviewsPage from "./components/review/ReviewsPage.js";
 import ManageReviews from "./components/admin/ManageReviews.js";
+import AboutPage from "./components/about/AboutPage.js";
+import ContactPage from "./components/contact/ContactPage.js";
 
 import PrivateRoute from "./routes/PrivateRoute.js";
 import GuestRoute from "./routes/GuestRoute.js";
@@ -156,6 +158,8 @@ function App() {
             <Route index element={<HomePage />} />
             <Route path="menu" element={<Menu />} />
             <Route path="reviews" element={<ReviewsPage />} />
+            <Route path="about" element={<AboutPage />} />
+            <Route path="contact" element={<ContactPage />} />
             <Route path="reservation" element={<PrivateRoute><ReservationPage /></PrivateRoute>} />
             <Route path="my-reservations" element={<PrivateRoute><MyReservations /></PrivateRoute>} />
             <Route path="profile" element={<PrivateRoute><ProfileLayout /></PrivateRoute>} />

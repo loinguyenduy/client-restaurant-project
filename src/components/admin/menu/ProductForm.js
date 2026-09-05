@@ -13,6 +13,7 @@ const emptyForm = {
   category_id: "",
   description: "",
   is_available: true,
+  is_featured: false,
 };
 
 const ProductForm = ({ categories, editingProduct, onSaved, onCancelEdit }) => {
@@ -39,6 +40,7 @@ const ProductForm = ({ categories, editingProduct, onSaved, onCancelEdit }) => {
       category_id: editingProduct.category_id ?? "",
       description: editingProduct.description || "",
       is_available: Boolean(editingProduct.is_available),
+      is_featured: Boolean(editingProduct.is_featured),
     });
     setImagePreview(editingProduct.image_url || "");
     setImageFile(null);
@@ -112,6 +114,7 @@ const ProductForm = ({ categories, editingProduct, onSaved, onCancelEdit }) => {
     payload.append("category_id", form.category_id);
     payload.append("description", form.description.trim());
     payload.append("is_available", form.is_available);
+    payload.append("is_featured", form.is_featured);
     if (imageFile) payload.append("image", imageFile);
 
     setIsSubmitting(true);
@@ -156,10 +159,17 @@ const ProductForm = ({ categories, editingProduct, onSaved, onCancelEdit }) => {
         <small>Maximum file size: 5 MB.</small>
       </div>
 
-      <label className="checkbox-label">
-        <input type="checkbox" name="is_available" checked={form.is_available} onChange={changeField} />
-        Available for ordering
-      </label>
+      <fieldset className="publishing-options">
+        <legend>Publishing and availability</legend>
+        <label className="checkbox-label">
+          <input type="checkbox" name="is_available" checked={form.is_available} onChange={changeField} />
+          <span><strong>Available for ordering</strong><small>Manual business flag; stock is managed separately.</small></span>
+        </label>
+        <label className="checkbox-label">
+          <input type="checkbox" name="is_featured" checked={form.is_featured} onChange={changeField} />
+          <span><strong>Feature on Homepage</strong><small>Include this dish in Signature Dishes.</small></span>
+        </label>
+      </fieldset>
 
       <div className="form-actions">
         {editingProduct && <button type="button" className="btn-cancel" onClick={reset}>Cancel edit</button>}

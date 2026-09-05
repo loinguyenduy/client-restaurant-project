@@ -101,6 +101,8 @@ const Menu = () => {
     const socket = getSocket();
     const updateAvailability = (event) => {
       if (!event?.productId) return;
+      // Compatibility event name: product publishing changes also invalidate the menu.
+      setRetryCount((count) => count + 1);
       if (event.deleted) {
         setProducts((current) => current.filter((product) => product.id !== event.productId));
         setSelectedProduct((current) => current?.id === event.productId ? null : current);

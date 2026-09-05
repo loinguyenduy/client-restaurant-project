@@ -14,13 +14,15 @@ import {
   Users,
   Boxes,
   Star,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { doLogoutSuccess } from "../../redux/actions/authAction";
 import { doClearCart } from "../../redux/actions/cartAction";
 import { logoutUserApi } from "../../services/authService";
 
-const AdminSidebar = () => {
+const AdminSidebar = ({ collapsed, onToggleCollapsed, onNavigate }) => {
   const { account } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -38,57 +40,58 @@ const AdminSidebar = () => {
   };
 
   const navClass = ({ isActive }) => isActive ? "nav-item active" : "nav-item";
+  const navProps = (label) => ({ className: navClass, onClick: onNavigate, title: collapsed ? label : undefined, "aria-label": label });
 
   return (
     <aside className="admin-sidebar">
       <div className="sidebar-brand">
-        <h2><span>ROYAL</span>{isAdmin ? "ADMIN" : "STAFF"}</h2>
-        <small>{isAdmin ? "Administration" : "Operations Portal"}</small>
+        <div className="brand-copy"><span className="brand-short" aria-hidden="true">RR</span><div className="brand-full"><strong>ROYAL RESTAURANT</strong><small>{isAdmin ? "Administration Portal" : "Operations Portal"}</small></div></div>
+        <button type="button" className="sidebar-collapse-button" onClick={onToggleCollapsed} aria-label={collapsed ? "Expand navigation" : "Collapse navigation"} title={collapsed ? "Expand navigation" : "Collapse navigation"}>{collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}</button>
       </div>
 
       <nav className="sidebar-nav">
         {isAdmin && (
-          <NavLink to={`${basePath}/dashboard`} className={navClass}>
-            <LayoutDashboard size={18} /> Dashboard
+          <NavLink to={`${basePath}/dashboard`} {...navProps("Dashboard")}>
+            <LayoutDashboard size={18} /><span>Dashboard</span>
           </NavLink>
         )}
 
-        <NavLink to={`${basePath}/orders`} className={navClass}>
-          <ShoppingBag size={18} /> {isAdmin ? "Manage Orders" : "Live Orders"}
+        <NavLink to={`${basePath}/orders`} {...navProps(isAdmin ? "Manage Orders" : "Live Orders")}>
+          <ShoppingBag size={18} /><span>{isAdmin ? "Manage Orders" : "Live Orders"}</span>
         </NavLink>
-        <NavLink to={`${basePath}/kitchen`} className={navClass}>
-          <ChefHat size={18} /> Kitchen Display
+        <NavLink to={`${basePath}/kitchen`} {...navProps("Kitchen Display")}>
+          <ChefHat size={18} /><span>Kitchen Display</span>
         </NavLink>
-        <NavLink to={`${basePath}/reservations`} className={navClass}>
-          <CalendarDays size={18} /> Reservations
+        <NavLink to={`${basePath}/reservations`} {...navProps("Reservations")}>
+          <CalendarDays size={18} /><span>Reservations</span>
         </NavLink>
-        <NavLink to={`${basePath}/pos`} className={navClass}>
-          <MonitorSmartphone size={18} /> POS / Tables
+        <NavLink to={`${basePath}/pos`} {...navProps("POS / Tables")}>
+          <MonitorSmartphone size={18} /><span>POS / Tables</span>
         </NavLink>
-        {isAdmin && <NavLink to={`${basePath}/tables`} className={navClass}><Table size={18} /> Manage Tables</NavLink>}
+        {isAdmin && <NavLink to={`${basePath}/tables`} {...navProps("Manage Tables")}><Table size={18} /><span>Manage Tables</span></NavLink>}
 
         {!isAdmin && (
-          <NavLink to={`${basePath}/attendance`} className={navClass}>
-            <UserCheck size={18} /> Attendance
+          <NavLink to={`${basePath}/attendance`} {...navProps("Attendance")}>
+            <UserCheck size={18} /><span>Attendance</span>
           </NavLink>
         )}
 
         {isAdmin && (
           <>
-            <NavLink to={`${basePath}/attendance-logs`} className={navClass}>
-              <ClipboardList size={18} /> Attendance Reports
+            <NavLink to={`${basePath}/attendance-logs`} {...navProps("Attendance Reports")}>
+              <ClipboardList size={18} /><span>Attendance Reports</span>
             </NavLink>
-            <NavLink to={`${basePath}/menu`} className={navClass}>
-              <MenuIcon size={18} /> Menu
+            <NavLink to={`${basePath}/menu`} {...navProps("Menu")}>
+              <MenuIcon size={18} /><span>Menu</span>
             </NavLink>
-            <NavLink to={`${basePath}/inventory`} className={navClass}>
-              <Boxes size={18} /> Inventory
+            <NavLink to={`${basePath}/inventory`} {...navProps("Inventory")}>
+              <Boxes size={18} /><span>Inventory</span>
             </NavLink>
-            <NavLink to={`${basePath}/reviews`} className={navClass}>
-              <Star size={18} /> Reviews
+            <NavLink to={`${basePath}/reviews`} {...navProps("Reviews")}>
+              <Star size={18} /><span>Reviews</span>
             </NavLink>
-            <NavLink to={`${basePath}/users`} className={navClass}>
-              <Users size={18} /> Account Management
+            <NavLink to={`${basePath}/users`} {...navProps("Account Management")}>
+              <Users size={18} /><span>Account Management</span>
             </NavLink>
           </>
         )}
@@ -102,8 +105,8 @@ const AdminSidebar = () => {
             <span className="role">{isAdmin ? "Administrator" : "Staff"}</span>
           </div>
         </div>
-        <button className="btn-logout" onClick={handleLogout}>
-          <LogOut size={16} /> Logout
+        <button className="btn-logout" onClick={handleLogout} title={collapsed ? "Logout" : undefined} aria-label="Logout">
+          <LogOut size={16} /><span>Logout</span>
         </button>
       </div>
     </aside>
